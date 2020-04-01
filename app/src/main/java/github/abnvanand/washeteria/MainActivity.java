@@ -1,13 +1,21 @@
 package github.abnvanand.washeteria;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.alamkanak.weekview.WeekView;
+import com.alamkanak.weekview.WeekViewDisplayable;
 import com.google.android.material.internal.NavigationMenu;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
@@ -27,6 +35,16 @@ public class MainActivity extends AppCompatActivity {
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
                 // TODO: Do something with yout menu items, or return false if you don't want to show them
                 return true;
+            }
+
+            @Override
+            public boolean onMenuItemSelected(MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.action_calendar) {
+                    startActivity(new Intent(MainActivity.this, DayviewActivity.class));
+
+                }
+                return false;
             }
         });
     }
