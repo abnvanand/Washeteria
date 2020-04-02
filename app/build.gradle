@@ -21,6 +21,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
+        debug{
+            buildConfigField 'String', 'BASE_URL', '"http://192.168.1.6:5000"'
+        }
     }
 
 }
@@ -39,6 +43,10 @@ dependencies {
 
     // Utils
     api "com.jakewharton.timber:timber:4.7.1"
+
+    // Network
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
 
     implementation 'androidx.annotation:annotation:1.1.0'
