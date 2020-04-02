@@ -21,11 +21,18 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <Spinner
+        android:id="@+id/locationSelector"
+        android:prompt="@string/prompt_select_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/appBarLayout" />
+
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:layout_below="@id/appBarLayout"
+        android:layout_below="@id/locationSelector"
         android:orientation="horizontal">
 
         <TextView
@@ -46,9 +53,11 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
+        android:scrollbars="vertical"
         tools:listitem="@layout/list_item_live_status" />
 
     <io.github.yavski.fabspeeddial.FabSpeedDial
