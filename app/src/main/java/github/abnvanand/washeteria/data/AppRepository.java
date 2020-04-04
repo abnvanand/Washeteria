@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.data.model.Machine;
+import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import retrofit2.Call;
@@ -21,7 +21,9 @@ import timber.log.Timber;
 
 public class AppRepository {
     private static AppRepository instance;
-    public MutableLiveData<List<Machine>> machines;
+    //    public MutableLiveData<List<Machine>> machines;
+    private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
+
 
     private AppDatabase mDb;
 
@@ -44,52 +46,35 @@ public class AppRepository {
 
     private AppRepository(Context context) {
         mDb = AppDatabase.getInstance(context);
-        machines = new MutableLiveData<>();
     }
 
 
-    public void getMachinesByLocationId(String locationId) {
+    public void fetchData(String locationId) {
         Timber.d("getMachinesByLocationId locationId: %s", locationId);
 
-        // Get cached results from local db
-        List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId).getValue();
-        machines.postValue(queryResults);
-        Timber.d("Local results: %s", queryResults);
+        loadMachinesByLocationIdFromDb(locationId);
 
-        // Call REST API to get most recent list of machines of selected location
-        refreshMachineList(locationId);
+        getMachinesByLocationidFromWeb(locationId);
     }
 
-    private void refreshMachineList(final String locationId) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
+    private void getMachinesByLocationidFromWeb(String locationId) {
+        // Call REST API to get most recent list of machines of selected location
+        WebService webService = RetrofitSingleton.getRetrofitInstance()
+                .create(WebService.class);
 
-                WebService webService = RetrofitSingleton.getRetrofitInstance()
-                        .create(WebService.class);
-
-
-                Call<List<Machine>> call = webService.getMachines(locationId);
-                call.enqueue(new Callback<List<Machine>>() {
+        webService.getMachines(locationId)
+                .enqueue(new Callback<List<Machine>>() {
                     @Override
                     public void onResponse(@NotNull Call<List<Machine>> call,
-                                           @NotNull final Response<List<Machine>> response) {
-
-
-                        // Update local db
-                        executor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                List<Machine> body = response.body();
-                                if (body == null)
-                                    return;
-
-                                Timber.d("Remote results: %s", body.toString());
-                                Timber.d("Inserting to db: %s", body);
-                                machines.postValue(body);
-                                mDb.machineDao().insertAll(body);
-                            }
-                        });
+                                           @NotNull Response<List<Machine>> response) {
+                        if (response.isSuccessful()) {
+                            addMachinesToDb(response.body(), locationId);
+                        } else {
+                            // TODO: Handle error codes
+                            Timber.e("Error in getMachines(locationId) %s/%s",
+                                    response.message(),
+                                    response.code());
+                        }
                     }
 
                     @Override
@@ -98,7 +83,39 @@ public class AppRepository {
                         Timber.d(t.getLocalizedMessage());
                     }
                 });
+
+    }
+
+    private void addMachinesToDb(List<Machine> body, String locationId) {
+        // Update local db
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (body == null)
+                    return;
+
+                Timber.d("Remote results: %s", body.toString());
+                Timber.d("Inserting to db: %s", body);
+                mDb.machineDao().insertAll(body);
+                loadMachinesByLocationIdFromDb(locationId);
             }
         });
+    }
+
+    private void loadMachinesByLocationIdFromDb(String locationId) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // Get cached results from local db
+                List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
+                // TODO: setValue vs postValue??
+                machineListObservable.postValue(queryResults);
+                Timber.d("Local results: %s", queryResults);
+            }
+        });
+    }
+
+    public MutableLiveData<List<Machine>> getMachineListObservable() {
+        return machineListObservable;
     }
 }

@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -104,29 +103,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initViewModel() {
-        final Observer<List<Machine>> machinesObserver = new Observer<List<Machine>>() {
-            @Override
-            public void onChanged(List<Machine> machineEntities) {
-                machines.clear();
-                if (machineEntities != null)
-                    machines.addAll(machineEntities);
-
-                if (machineAdapter == null) {
-                    machineAdapter = new MachineAdapter(
-                            MainActivity.this,
-                            machines);
-                    recyclerView.setAdapter(machineAdapter);
-                } else {
-                    machineAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-
         mViewModel = new ViewModelProvider(this)
                 .get(MainViewModel.class);
 
-        mViewModel.machines
-                .observe(this, machinesObserver);
+        mViewModel.getMachinesListObservable().observe(this,
+                machineEntities -> {
+                    machines.clear();
+                    if (machineEntities != null)
+                        machines.addAll(machineEntities);
+
+                    if (machineAdapter == null) {
+                        machineAdapter = new MachineAdapter(
+                                MainActivity.this,
+                                machines);
+                        recyclerView.setAdapter(machineAdapter);
+                    } else {
+                        machineAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     private void generateLocationList(List<Location> locations) {
@@ -143,17 +137,6 @@ public class MainActivity extends AppCompatActivity
         spinner.setAdapter(locationArrayAdapter);
 
         Timber.d("locationArrayAdapter: %s", locationArrayAdapter);
-    }
-
-    private void generateMachineList(List<Machine> machines) {
-        machineAdapter = new MachineAdapter(this, machines);
-
-        recyclerView.setHasFixedSize(true); // Each item of same height save sore remeasurements
-        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        Timber.d("machineAdapter: %s", machineAdapter);
-        recyclerView.setAdapter(machineAdapter);
     }
 
     @Override
@@ -189,10 +172,7 @@ public class MainActivity extends AppCompatActivity
         // Showing selected spinner item
         Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
 
-        // generateMachineList(machines);
-//        mViewModel.callWebServiceToRefreshMachineListForLocationId(item.getLocationId());
-        // TODO get machines list from ViewModel
-        mViewModel.getMachinesByLocationId(item.getLocationId());
+        mViewModel.getData(item.getLocationId());
     }
 
     @Override
