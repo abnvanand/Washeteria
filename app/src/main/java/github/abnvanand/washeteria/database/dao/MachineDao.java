@@ -1,6 +1,5 @@
 package github.abnvanand.washeteria.database.dao;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -24,7 +23,7 @@ public interface MachineDao {
     Machine getMachineById(String id);
 
     @Query("SELECT * FROM machines WHERE locationId=:locationId")
-    LiveData<List<Machine>> getAllByLocationId(String locationId);
+    List<Machine> getAllByLocationId(String locationId);
 
     @Query("SELECT * FROM machines")
     List<Machine> getAll();
