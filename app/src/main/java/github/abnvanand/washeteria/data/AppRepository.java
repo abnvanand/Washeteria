@@ -2,7 +2,6 @@ package github.abnvanand.washeteria.data;
 
 import android.content.Context;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,7 @@ public class AppRepository {
     private static AppRepository instance;
     //    public MutableLiveData<List<Machine>> machines;
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
-    private MutableLiveData<List<Location>> locations = new MutableLiveData<>();
+    private MutableLiveData<List<Location>> locationListObservable = new MutableLiveData<>();
 
 
     private AppDatabase mDb;
@@ -111,7 +110,6 @@ public class AppRepository {
             public void run() {
                 // Get cached results from local db
                 List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
-                // TODO: setValue vs postValue??
                 machineListObservable.postValue(queryResults);
                 Timber.d("Local results: %s", queryResults);
             }
@@ -122,29 +120,57 @@ public class AppRepository {
         return machineListObservable;
     }
 
-    public LiveData<List<Location>> getLocations() {
-        return locations;
+    public MutableLiveData<List<Location>> getLocationListObservable() {
+        return locationListObservable;
     }
 
     public void fetchLocations() {
+        loadLocationsFromDb();
+        fetchLocationsFromWeb();
+    }
+
+    private void fetchLocationsFromWeb() {
         WebService webService = RetrofitSingleton.getRetrofitInstance()
                 .create(WebService.class);
-        Call<List<Location>> call = webService.getLocations();
-        call.enqueue(new Callback<List<Location>>() {
-            @Override
-            public void onResponse(@NotNull Call<List<Location>> call,
-                                   @NotNull Response<List<Location>> response) {
-                if (response.isSuccessful()) {
-                    List<Location> body = response.body();
-                    locations.postValue(body);
-                    Timber.d("Response code: %s body:%s", response.code(), body);
-                }
-            }
+        webService.getLocations()
+                .enqueue(new Callback<List<Location>>() {
+                    @Override
+                    public void onResponse(@NotNull Call<List<Location>> call,
+                                           @NotNull Response<List<Location>> response) {
+                        if (response.isSuccessful()) {
+                            addLocationsToDb(response.body());
+                        } else {
+                            Timber.e("Error in getMachines(locationId) %s/%s",
+                                    response.message(),
+                                    response.code());
+                        }
+                    }
 
+                    @Override
+                    public void onFailure(@NotNull Call<List<Location>> call,
+                                          @NotNull Throwable t) {
+                        Timber.e(t.getLocalizedMessage());
+                    }
+                });
+    }
+
+    private void addLocationsToDb(List<Location> body) {
+        executor.execute(new Runnable() {
             @Override
-            public void onFailure(@NotNull Call<List<Location>> call,
-                                  @NotNull Throwable t) {
-                Timber.e(t.getLocalizedMessage());
+            public void run() {
+                mDb.locationDao().insertAll(body);
+                loadLocationsFromDb();
+            }
+        });
+    }
+
+    private void loadLocationsFromDb() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Location> queryResults = mDb.locationDao().getAll();
+                locationListObservable.postValue(queryResults);
+                Timber.d("loadLocationsFromDb: %s", queryResults);
             }
         });
     }

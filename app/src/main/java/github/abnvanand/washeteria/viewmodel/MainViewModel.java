@@ -19,14 +19,18 @@ public class MainViewModel extends AndroidViewModel {
     //mediator lists because they transfer the changes of the livedata lists of the repository
     private MediatorLiveData<List<Machine>> machineListObservable = new MediatorLiveData<>();
 
-    private LiveData<List<Location>> locations;
+    private MediatorLiveData<List<Location>> locationListObservable = new MediatorLiveData<>();
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         mRepository = AppRepository.getInstance(application.getApplicationContext());
 
         mRepository.fetchLocations();
+
         //subscribe to Livedata of the repository and pass it along to the view (activity - fragment etc)
+        locationListObservable.addSource(mRepository.getLocationListObservable(),
+                locations -> locationListObservable.setValue(locations));
+
         machineListObservable.addSource(mRepository.getMachineListObservable(),
                 machines -> machineListObservable.setValue(machines));
     }
@@ -39,7 +43,7 @@ public class MainViewModel extends AndroidViewModel {
         return machineListObservable;
     }
 
-    public LiveData<List<Location>> getLocations() {
-        return mRepository.getLocations();
+    public LiveData<List<Location>> getLocationListObservable() {
+        return locationListObservable;
     }
 }

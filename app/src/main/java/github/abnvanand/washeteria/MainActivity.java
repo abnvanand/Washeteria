@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity
         mViewModel = new ViewModelProvider(this)
                 .get(MainViewModel.class);
 
-        mViewModel.getLocations().observe(this,
+        mViewModel.getLocationListObservable().observe(this,
                 this::fillLocationSpinner);
 
         mViewModel.getMachinesListObservable().observe(this,
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity
         // Showing selected spinner item
         Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
 
-        mViewModel.getData(item.getLocationId());
+        mViewModel.getData(item.getId());
     }
 
     @Override

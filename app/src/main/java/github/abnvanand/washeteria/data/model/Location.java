@@ -1,41 +1,52 @@
 package github.abnvanand.washeteria.data.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.SerializedName;
 
+import org.jetbrains.annotations.NotNull;
+
+@Entity(tableName = "locations")
 public class Location {
+    @PrimaryKey
+    @NonNull
     @SerializedName("locationId")
-    private String locationId;
+    private String id;
+
     @SerializedName("locationName")
-    private String locationName;
+    private String name;
 
     // TODO: Add a list of machines
 
-    public Location(String locationId, String locationName) {
-        this.locationId = locationId;
-        this.locationName = locationName;
+    public Location(@NotNull String id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public String getLocationId() {
-        return locationId;
+    @NotNull
+    public String getId() {
+        return id;
     }
 
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
+    public void setId(@NotNull String id) {
+        this.id = id;
     }
 
-    public String getLocationName() {
-        return locationName;
+    public String getName() {
+        return name;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Location{" +
-                "locationId='" + locationId + '\'' +
-                ", locationName='" + locationName + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 '}';
     }
 }
