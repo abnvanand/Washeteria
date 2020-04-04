@@ -49,8 +49,8 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomVi
 
     @Override
     public void onBindViewHolder(@NonNull MachineAdapter.CustomViewHolder holder, int position) {
-        holder.machineName.setText(dataList.get(position).getMachineId());
-        holder.machineStatus.setText(dataList.get(position).getMachineName());
+        holder.machineName.setText(dataList.get(position).getName());
+        holder.machineStatus.setText(dataList.get(position).getStatus());
     }
 
     @Override

@@ -4,7 +4,7 @@
     tools:context="github.abnvanand.washeteria.MainActivity">
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/ic_default_profile_avatar"
+        android:icon="@drawable/ic_signin"
         android:orderInCategory="100"
         android:title="@string/action_signin"
         app:showAsAction="always" />

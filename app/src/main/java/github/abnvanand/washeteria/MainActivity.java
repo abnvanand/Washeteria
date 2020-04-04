@@ -1,6 +1,5 @@
 package github.abnvanand.washeteria;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,6 +21,7 @@ import com.google.android.material.internal.NavigationMenu;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import github.abnvanand.washeteria.data.adapters.MachineAdapter;
@@ -28,21 +30,22 @@ import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.ui.signin.SigninActivity;
+import github.abnvanand.washeteria.viewmodel.MainViewModel;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
-import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemSelectedListener {
+        implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener {
 
-    private SimpleMenuListenerAdapter menuListener;
-    MachineAdapter machineAdapter;
-    RecyclerView recyclerView;
-    ProgressDialog progressDialog;
-    Spinner spinner;
+    private List<Machine> machines = new ArrayList<>();
+    private MachineAdapter machineAdapter;
+    private MainViewModel mViewModel;
+
+    private RecyclerView recyclerView;
+    private Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,33 +55,22 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FabSpeedDial fab = findViewById(R.id.fabSpeedDial);
-        menuListener = new SimpleMenuListenerAdapter() {
-            @Override
-            public boolean onPrepareMenu(NavigationMenu navigationMenu) {
-                // TODO: Do something with yout menu items, or return false if you don't want to show them
-                return true;
-            }
+        fab.setMenuListener(this);
 
-            @Override
-            public boolean onMenuItemSelected(MenuItem item) {
-                int id = item.getItemId();
-                if (id == R.id.action_calendar) {
-                    startActivity(new Intent(MainActivity.this, DayviewActivity.class));
-
-                }
-                return false;
-            }
-        };
-        fab.setMenuListener(menuListener);
-
-        spinner = (Spinner) findViewById(R.id.locationSelector);
+        spinner = findViewById(R.id.locationSelector);
         spinner.setOnItemSelectedListener(this);
 
+        recyclerView = findViewById(R.id.recyclerView);
 
-        progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setMessage("Loading....");
-        progressDialog.show();
+        initRecyclerView();
+        initViewModel();
 
+        callToGetLocations();
+    }
+
+
+    // TODO: move to viewmodel and repository
+    private void callToGetLocations() {
         WebService webService = RetrofitSingleton.getRetrofitInstance()
                 .create(WebService.class);
         Call<List<Location>> call = webService.getLocations();
@@ -86,18 +78,16 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(@NotNull Call<List<Location>> call,
                                    @NotNull Response<List<Location>> response) {
-                progressDialog.dismiss();
                 // Spinner Drop down elements
                 List<Location> body = response.body();
 
                 generateLocationList(body);
-                Timber.d("body.toString()%s", body.toString());
+                Timber.d("body.toString(): %s", body != null ? body.toString() : null);
             }
 
             @Override
             public void onFailure(@NotNull Call<List<Location>> call,
                                   @NotNull Throwable t) {
-                progressDialog.dismiss();
                 Toast.makeText(MainActivity.this, "Err!!!", Toast.LENGTH_SHORT)
                         .show();
                 Timber.d(t.getLocalizedMessage());
@@ -105,8 +95,41 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void initRecyclerView() {
+        recyclerView.setHasFixedSize(true); // Each item of same height save sore remeasurements
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // TODO: Add divider item decoration
+    }
+
+    private void initViewModel() {
+        final Observer<List<Machine>> machinesObserver = new Observer<List<Machine>>() {
+            @Override
+            public void onChanged(List<Machine> machineEntities) {
+                machines.clear();
+                if (machineEntities != null)
+                    machines.addAll(machineEntities);
+
+                if (machineAdapter == null) {
+                    machineAdapter = new MachineAdapter(
+                            MainActivity.this,
+                            machines);
+                    recyclerView.setAdapter(machineAdapter);
+                } else {
+                    machineAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+
+        mViewModel = new ViewModelProvider(this)
+                .get(MainViewModel.class);
+
+        mViewModel.machines
+                .observe(this, machinesObserver);
+    }
+
     private void generateLocationList(List<Location> locations) {
-        recyclerView = findViewById(R.id.recyclerView);
         // Creating adapter for spinner
         ArrayAdapter<Location> locationArrayAdapter =
                 new ArrayAdapter<>(this,
@@ -123,10 +146,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void generateMachineList(List<Machine> machines) {
-        recyclerView = findViewById(R.id.recyclerView);
         machineAdapter = new MachineAdapter(this, machines);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+
+        recyclerView.setHasFixedSize(true); // Each item of same height save sore remeasurements
+        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
+
         Timber.d("machineAdapter: %s", machineAdapter);
         recyclerView.setAdapter(machineAdapter);
     }
@@ -164,36 +189,34 @@ public class MainActivity extends AppCompatActivity
         // Showing selected spinner item
         Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
 
-        // Call to get machines of selected location
-        WebService webService = RetrofitSingleton.getRetrofitInstance()
-                .create(WebService.class);
-
-        progressDialog.show();
-        Call<List<Machine>> call = webService.getMachines(item.getLocationId());
-        call.enqueue(new Callback<List<Machine>>() {
-            @Override
-            public void onResponse(@NotNull Call<List<Machine>> call,
-                                   @NotNull Response<List<Machine>> response) {
-                progressDialog.dismiss();
-                List<Machine> body = response.body();
-                generateMachineList(body);
-                Timber.d("body.toString()%s", body.toString());
-            }
-
-            @Override
-            public void onFailure(@NotNull Call<List<Machine>> call,
-                                  @NotNull Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(MainActivity.this, "Err!!!", Toast.LENGTH_SHORT)
-                        .show();
-                Timber.d(t.getLocalizedMessage());
-            }
-        });
-
+        // generateMachineList(machines);
+//        mViewModel.callWebServiceToRefreshMachineListForLocationId(item.getLocationId());
+        // TODO get machines list from ViewModel
+        mViewModel.getMachinesByLocationId(item.getLocationId());
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    @Override
+    public boolean onPrepareMenu(NavigationMenu navigationMenu) {
+        // TODO: Do something with yout menu items, or return false if you don't want to show them
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_calendar) {
+            startActivity(new Intent(MainActivity.this, DayviewActivity.class));
+        }
+        return false;
+    }
+
+    @Override
+    public void onMenuClosed() {
 
     }
 }

@@ -1,48 +1,91 @@
 package github.abnvanand.washeteria.data.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "machines", primaryKeys = {"id", "locationId"})
 public class Machine {
     @SerializedName("machineId")
-    private String machineId;
-    @SerializedName("machineName")
-    private String machineName;
+    @NonNull
+    private String id;
 
+    @SerializedName("machineName")
+    private String name;
+
+
+    @SerializedName("locationId")
+    @NonNull
     private String locationId;  // reverse mapping
-    private String status;  // Vacant / Occupied / Out-of-Order
-    private String timeLeft; // Set if status == Occupied
+    @SerializedName("status")
+    private String status;  // Vacant / Occupied / Malfunctioned
+    @SerializedName("remainingTime")
+    private String remainingTime; // Set if status == Occupied
     // TODO: Add a list of events of this machine
 
+    @Ignore
+    public Machine() {
 
-    public Machine(String machineId, String machineName) {
-        this.machineId = machineId;
-        this.machineName = machineName;
     }
 
-    public String getMachineId() {
-        return machineId;
+    public Machine(String id, String name, String locationId, String status, String remainingTime) {
+        this.id = id;
+        this.name = name;
+        this.locationId = locationId;
+        this.status = status;
+        this.remainingTime = remainingTime;
     }
 
-    public void setMachineId(String machineId) {
-        this.machineId = machineId;
+    public String getId() {
+        return id;
     }
 
-    public String getMachineName() {
-        return machineName;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setMachineName(String machineName) {
-        this.machineName = machineName;
+    public String getName() {
+        return name;
+    }
+
+    public String getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(String remainingTime) {
+        this.remainingTime = remainingTime;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Machine{" +
-                "machineId='" + machineId + '\'' +
-                ", machineName='" + machineName + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", locationId='" + locationId + '\'' +
                 ", status='" + status + '\'' +
-                ", timeLeft='" + timeLeft + '\'' +
+                ", remainingTime='" + remainingTime + '\'' +
                 '}';
     }
 }
