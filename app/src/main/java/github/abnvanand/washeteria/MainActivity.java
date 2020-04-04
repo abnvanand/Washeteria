@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.internal.NavigationMenu;
 
@@ -30,7 +31,7 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener {
+        implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
 
     private List<Machine> machines = new ArrayList<>();
     private MachineAdapter machineAdapter;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity
 
     private RecyclerView recyclerView;
     private Spinner spinner;
+    private SwipeRefreshLayout pullToRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity
         spinner.setOnItemSelectedListener(this);
 
         recyclerView = findViewById(R.id.recyclerView);
+        pullToRefresh = findViewById(R.id.pullToRefresh);
+        pullToRefresh.setOnRefreshListener(this);
 
         initRecyclerView();
         initViewModel();
@@ -87,6 +91,9 @@ public class MainActivity extends AppCompatActivity
                     } else {
                         machineAdapter.notifyDataSetChanged();
                     }
+
+                    if (pullToRefresh.isRefreshing())
+                        pullToRefresh.setRefreshing(false);
                 });
     }
 
@@ -134,12 +141,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // On selecting a spinner item
-        Location item = (Location) parent.getItemAtPosition(position);
+        Location location = (Location) parent.getItemAtPosition(position);
 
         // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + item, Toast.LENGTH_LONG).show();
+        Toast.makeText(parent.getContext(), "Selected: " + location, Toast.LENGTH_LONG).show();
 
-        mViewModel.getData(item.getId());
+        mViewModel.getData(location.getId());
+        pullToRefresh.setRefreshing(true);
     }
 
     @Override
@@ -165,5 +173,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMenuClosed() {
 
+    }
+
+    @Override
+    public void onRefresh() {
+        Location location = (Location) spinner.getSelectedItem();
+        mViewModel.getData(location.getId());
     }
 }

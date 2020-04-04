@@ -50,6 +50,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.2.1'
     implementation 'io.github.yavski:fab-speed-dial:1.0.6'
     implementation 'com.github.thellmund.Android-Week-View:core:4.0.1'
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+
 
     // Utils
     api "com.jakewharton.timber:timber:4.7.1"
