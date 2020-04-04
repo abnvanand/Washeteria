@@ -14,8 +14,8 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
-import github.abnvanand.washeteria.data.database.AppDatabase;
-import github.abnvanand.washeteria.data.database.dao.MachineDao;
+import github.abnvanand.washeteria.database.AppDatabase;
+import github.abnvanand.washeteria.database.dao.MachineDao;
 import github.abnvanand.washeteria.data.model.Machine;
 import timber.log.Timber;
 

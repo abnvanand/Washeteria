@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import github.abnvanand.washeteria.data.adapters.MachineAdapter;
+import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.data.model.Location;
 import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;

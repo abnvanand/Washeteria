@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.data.database.converters;
+package github.abnvanand.washeteria.database.converters;
 
 import androidx.room.TypeConverter;
 

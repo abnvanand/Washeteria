@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.data.adapters;
+package github.abnvanand.washeteria.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

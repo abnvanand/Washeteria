@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import github.abnvanand.washeteria.data.database.AppDatabase;
+import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;

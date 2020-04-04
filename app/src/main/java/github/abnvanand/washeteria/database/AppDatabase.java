@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.data.database;
+package github.abnvanand.washeteria.database;
 
 import android.content.Context;
 
@@ -7,8 +7,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import github.abnvanand.washeteria.data.database.converters.DateConverter;
-import github.abnvanand.washeteria.data.database.dao.MachineDao;
+import github.abnvanand.washeteria.database.converters.DateConverter;
+import github.abnvanand.washeteria.database.dao.MachineDao;
 import github.abnvanand.washeteria.data.model.Machine;
 
 @Database(entities = {Machine.class}, version = 1)
