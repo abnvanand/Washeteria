@@ -10,6 +10,7 @@ import androidx.lifecycle.MediatorLiveData;
 import java.util.List;
 
 import github.abnvanand.washeteria.data.AppRepository;
+import github.abnvanand.washeteria.data.model.Location;
 import github.abnvanand.washeteria.data.model.Machine;
 
 public class MainViewModel extends AndroidViewModel {
@@ -18,22 +19,27 @@ public class MainViewModel extends AndroidViewModel {
     //mediator lists because they transfer the changes of the livedata lists of the repository
     private MediatorLiveData<List<Machine>> machineListObservable = new MediatorLiveData<>();
 
+    private LiveData<List<Location>> locations;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         mRepository = AppRepository.getInstance(application.getApplicationContext());
 
-
+        mRepository.fetchLocations();
         //subscribe to Livedata of the repository and pass it along to the view (activity - fragment etc)
         machineListObservable.addSource(mRepository.getMachineListObservable(),
                 machines -> machineListObservable.setValue(machines));
     }
 
     public void getData(String locationId) {
-        mRepository.fetchData(locationId);
+        mRepository.fetchMachinesByLocation(locationId);
     }
 
     public LiveData<List<Machine>> getMachinesListObservable() {
         return machineListObservable;
+    }
+
+    public LiveData<List<Location>> getLocations() {
+        return mRepository.getLocations();
     }
 }

@@ -2,6 +2,7 @@ package github.abnvanand.washeteria.data;
 
 import android.content.Context;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import github.abnvanand.washeteria.data.model.Location;
 import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
@@ -23,6 +25,7 @@ public class AppRepository {
     private static AppRepository instance;
     //    public MutableLiveData<List<Machine>> machines;
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
+    private MutableLiveData<List<Location>> locations = new MutableLiveData<>();
 
 
     private AppDatabase mDb;
@@ -49,7 +52,7 @@ public class AppRepository {
     }
 
 
-    public void fetchData(String locationId) {
+    public void fetchMachinesByLocation(String locationId) {
         Timber.d("getMachinesByLocationId locationId: %s", locationId);
 
         loadMachinesByLocationIdFromDb(locationId);
@@ -117,5 +120,32 @@ public class AppRepository {
 
     public MutableLiveData<List<Machine>> getMachineListObservable() {
         return machineListObservable;
+    }
+
+    public LiveData<List<Location>> getLocations() {
+        return locations;
+    }
+
+    public void fetchLocations() {
+        WebService webService = RetrofitSingleton.getRetrofitInstance()
+                .create(WebService.class);
+        Call<List<Location>> call = webService.getLocations();
+        call.enqueue(new Callback<List<Location>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<Location>> call,
+                                   @NotNull Response<List<Location>> response) {
+                if (response.isSuccessful()) {
+                    List<Location> body = response.body();
+                    locations.postValue(body);
+                    Timber.d("Response code: %s body:%s", response.code(), body);
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<List<Location>> call,
+                                  @NotNull Throwable t) {
+                Timber.e(t.getLocalizedMessage());
+            }
+        });
     }
 }

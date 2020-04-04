@@ -18,22 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.internal.NavigationMenu;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.data.model.Location;
 import github.abnvanand.washeteria.data.model.Machine;
-import github.abnvanand.washeteria.network.RetrofitSingleton;
-import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.ui.signin.SigninActivity;
 import github.abnvanand.washeteria.viewmodel.MainViewModel;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
@@ -63,39 +56,10 @@ public class MainActivity extends AppCompatActivity
 
         initRecyclerView();
         initViewModel();
-
-        callToGetLocations();
-    }
-
-
-    // TODO: move to viewmodel and repository
-    private void callToGetLocations() {
-        WebService webService = RetrofitSingleton.getRetrofitInstance()
-                .create(WebService.class);
-        Call<List<Location>> call = webService.getLocations();
-        call.enqueue(new Callback<List<Location>>() {
-            @Override
-            public void onResponse(@NotNull Call<List<Location>> call,
-                                   @NotNull Response<List<Location>> response) {
-                // Spinner Drop down elements
-                List<Location> body = response.body();
-
-                generateLocationList(body);
-                Timber.d("body.toString(): %s", body != null ? body.toString() : null);
-            }
-
-            @Override
-            public void onFailure(@NotNull Call<List<Location>> call,
-                                  @NotNull Throwable t) {
-                Toast.makeText(MainActivity.this, "Err!!!", Toast.LENGTH_SHORT)
-                        .show();
-                Timber.d(t.getLocalizedMessage());
-            }
-        });
     }
 
     private void initRecyclerView() {
-        recyclerView.setHasFixedSize(true); // Each item of same height save sore remeasurements
+        recyclerView.setHasFixedSize(true); // Each item of same height save sore re-measurements
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -105,6 +69,9 @@ public class MainActivity extends AppCompatActivity
     private void initViewModel() {
         mViewModel = new ViewModelProvider(this)
                 .get(MainViewModel.class);
+
+        mViewModel.getLocations().observe(this,
+                this::fillLocationSpinner);
 
         mViewModel.getMachinesListObservable().observe(this,
                 machineEntities -> {
@@ -123,7 +90,7 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    private void generateLocationList(List<Location> locations) {
+    private void fillLocationSpinner(List<Location> locations) {
         // Creating adapter for spinner
         ArrayAdapter<Location> locationArrayAdapter =
                 new ArrayAdapter<>(this,
