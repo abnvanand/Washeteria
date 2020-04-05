@@ -37,7 +37,6 @@
             android:id="@+id/locationSelector"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="?android:attr/selectableItemBackground"
             android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             android:prompt="@string/prompt_select_location" />
 
