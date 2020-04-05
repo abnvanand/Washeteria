@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.viewmodel;
+package github.abnvanand.washeteria.ui.dashboard;
 
 import android.app.Application;
 

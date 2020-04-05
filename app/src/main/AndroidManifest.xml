@@ -17,7 +17,7 @@
         <activity android:name=".ui.signin.SigninActivity" />
         <activity android:name=".DayviewActivity"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.dashboard.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

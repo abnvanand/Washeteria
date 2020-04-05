@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria;
+package github.abnvanand.washeteria.ui.dashboard;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,11 +23,12 @@ import com.google.android.material.internal.NavigationMenu;
 import java.util.ArrayList;
 import java.util.List;
 
+import github.abnvanand.washeteria.DayviewActivity;
+import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.data.model.Location;
 import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.ui.signin.SigninActivity;
-import github.abnvanand.washeteria.viewmodel.MainViewModel;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
