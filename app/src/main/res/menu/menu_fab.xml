@@ -7,6 +7,6 @@
         android:title="@string/menu_item_day_view" />
     <item
         android:id="@+id/action_assistant"
-        android:icon="@drawable/ic_assistant"
+        android:icon="@drawable/ic_bot_mini"
         android:title="@string/menu_item_assistant" />
 </menu>
