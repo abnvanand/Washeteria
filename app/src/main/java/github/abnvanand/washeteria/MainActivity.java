@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity
     private MachineAdapter machineAdapter;
     private MainViewModel mViewModel;
 
-    private RecyclerView recyclerView;
+    private RecyclerView mRecyclerView;
     private Spinner spinner;
     private SwipeRefreshLayout pullToRefresh;
 
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         spinner = findViewById(R.id.locationSelector);
         spinner.setOnItemSelectedListener(this);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView = findViewById(R.id.recyclerView);
         pullToRefresh = findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(this);
 
@@ -63,11 +64,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initRecyclerView() {
-        recyclerView.setHasFixedSize(true); // Each item of same height save sore re-measurements
+        mRecyclerView.setHasFixedSize(true); // Each item of same height save sore re-measurements
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setLayoutManager(layoutManager);
 
-        // TODO: Add divider item decoration
+        DividerItemDecoration divider = new DividerItemDecoration(
+                mRecyclerView.getContext(), layoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(divider);
     }
 
     private void initViewModel() {
@@ -87,7 +90,7 @@ public class MainActivity extends AppCompatActivity
                         machineAdapter = new MachineAdapter(
                                 MainActivity.this,
                                 machines);
-                        recyclerView.setAdapter(machineAdapter);
+                        mRecyclerView.setAdapter(machineAdapter);
                     } else {
                         machineAdapter.notifyDataSetChanged();
                     }
@@ -104,7 +107,6 @@ public class MainActivity extends AppCompatActivity
                         android.R.layout.simple_spinner_item,
                         locations);
 
-        // Drop down layout style - list view with radio button
         locationArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // attaching data adapter to spinner
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity
         Location location = (Location) parent.getItemAtPosition(position);
 
         // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + location, Toast.LENGTH_LONG).show();
+        Toast.makeText(parent.getContext(), "Selected: " + location.getName(), Toast.LENGTH_LONG).show();
 
         mViewModel.getData(location.getId());
         pullToRefresh.setRefreshing(true);

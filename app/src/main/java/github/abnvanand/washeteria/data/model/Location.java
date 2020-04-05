@@ -42,8 +42,15 @@ public class Location {
         this.name = name;
     }
 
+    // Simplify tostring so that Spinner dropdown shows a human readable name
+    // A better solution could be https://stackoverflow.com/a/8116756/5463404 TODO
     @Override
     public String toString() {
+        return this.name;
+    }
+
+    // Added as a replacement for our old toString()
+    public String toRepr() {
         return "Location{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
