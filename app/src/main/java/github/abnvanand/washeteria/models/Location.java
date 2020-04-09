@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.data.model;
+package github.abnvanand.washeteria.models;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;

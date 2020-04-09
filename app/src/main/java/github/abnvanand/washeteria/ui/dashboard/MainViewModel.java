@@ -9,9 +9,9 @@ import androidx.lifecycle.MediatorLiveData;
 
 import java.util.List;
 
-import github.abnvanand.washeteria.data.AppRepository;
-import github.abnvanand.washeteria.data.model.Location;
-import github.abnvanand.washeteria.data.model.Machine;
+import github.abnvanand.washeteria.repositories.AppRepository;
+import github.abnvanand.washeteria.models.Location;
+import github.abnvanand.washeteria.models.Machine;
 
 public class MainViewModel extends AndroidViewModel {
 

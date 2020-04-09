@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria.data;
+package github.abnvanand.washeteria.repositories;
 
 import android.content.Context;
 
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import github.abnvanand.washeteria.data.model.Location;
-import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.database.AppDatabase;
+import github.abnvanand.washeteria.models.Location;
+import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import retrofit2.Call;
@@ -52,10 +52,7 @@ public class AppRepository {
 
 
     public void fetchMachinesByLocation(String locationId) {
-        Timber.d("getMachinesByLocationId locationId: %s", locationId);
-
         loadMachinesByLocationIdFromDb(locationId);
-
         getMachinesByLocationidFromWeb(locationId);
     }
 
@@ -69,13 +66,13 @@ public class AppRepository {
                     @Override
                     public void onResponse(@NotNull Call<List<Machine>> call,
                                            @NotNull Response<List<Machine>> response) {
-                        if (response.isSuccessful()) {
+                        if (!response.isSuccessful()) {
+                            showError(response.message());
+                            return;
+                        }
+
+                        if (response.body() != null) {
                             addMachinesToDb(response.body(), locationId);
-                        } else {
-                            // TODO: Handle error codes
-                            Timber.e("Error in getMachines(locationId) %s/%s",
-                                    response.message(),
-                                    response.code());
                         }
                     }
 
@@ -89,30 +86,16 @@ public class AppRepository {
     }
 
     private void addMachinesToDb(List<Machine> body, String locationId) {
-        // Update local db
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (body == null)
-                    return;
-
-                Timber.d("Remote results: %s", body.toString());
-                Timber.d("Inserting to db: %s", body);
-                mDb.machineDao().insertAll(body);
-                loadMachinesByLocationIdFromDb(locationId);
-            }
+        executor.execute(() -> {
+            mDb.machineDao().insertAll(body);
+            loadMachinesByLocationIdFromDb(locationId);
         });
     }
 
     private void loadMachinesByLocationIdFromDb(String locationId) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                // Get cached results from local db
-                List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
-                machineListObservable.postValue(queryResults);
-                Timber.d("Local results: %s", queryResults);
-            }
+        executor.execute(() -> {
+            List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
+            machineListObservable.postValue(queryResults);
         });
     }
 
@@ -137,12 +120,13 @@ public class AppRepository {
                     @Override
                     public void onResponse(@NotNull Call<List<Location>> call,
                                            @NotNull Response<List<Location>> response) {
-                        if (response.isSuccessful()) {
+                        if (!response.isSuccessful()) {
+                            showError(response.message());
+                            return;
+                        }
+
+                        if (response.body() != null) {
                             addLocationsToDb(response.body());
-                        } else {
-                            Timber.e("Error in getMachines(locationId) %s/%s",
-                                    response.message(),
-                                    response.code());
                         }
                     }
 
@@ -154,24 +138,21 @@ public class AppRepository {
                 });
     }
 
+    private void showError(String message) {
+        Timber.e(message);
+    }
+
     private void addLocationsToDb(List<Location> body) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                mDb.locationDao().insertAll(body);
-                loadLocationsFromDb();
-            }
+        executor.execute(() -> {
+            mDb.locationDao().insertAll(body);
+            loadLocationsFromDb();
         });
     }
 
     private void loadLocationsFromDb() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<Location> queryResults = mDb.locationDao().getAll();
-                locationListObservable.postValue(queryResults);
-                Timber.d("loadLocationsFromDb: %s", queryResults);
-            }
+        executor.execute(() -> {
+            List<Location> queryResults = mDb.locationDao().getAll();
+            locationListObservable.postValue(queryResults);
         });
     }
 }

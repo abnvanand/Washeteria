@@ -7,11 +7,11 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import github.abnvanand.washeteria.data.model.Location;
-import github.abnvanand.washeteria.data.model.Machine;
 import github.abnvanand.washeteria.database.converters.DateConverter;
 import github.abnvanand.washeteria.database.dao.LocationDao;
 import github.abnvanand.washeteria.database.dao.MachineDao;
+import github.abnvanand.washeteria.models.Location;
+import github.abnvanand.washeteria.models.Machine;
 
 @Database(entities = {Machine.class, Location.class}, version = 1)
 @TypeConverters(DateConverter.class)

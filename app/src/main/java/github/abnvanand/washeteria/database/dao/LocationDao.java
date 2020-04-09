@@ -8,7 +8,7 @@ import androidx.room.Query;
 
 import java.util.List;
 
-import github.abnvanand.washeteria.data.model.Location;
+import github.abnvanand.washeteria.models.Location;
 
 @Dao
 public interface LocationDao {

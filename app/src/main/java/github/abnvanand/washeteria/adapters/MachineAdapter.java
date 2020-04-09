@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import github.abnvanand.washeteria.R;
-import github.abnvanand.washeteria.data.model.Machine;
+import github.abnvanand.washeteria.models.Machine;
 
 public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomViewHolder> {
 

@@ -16,7 +16,7 @@ import java.util.List;
 
 import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.database.dao.MachineDao;
-import github.abnvanand.washeteria.data.model.Machine;
+import github.abnvanand.washeteria.models.Machine;
 import timber.log.Timber;
 
 import static org.junit.Assert.assertEquals;

@@ -26,9 +26,9 @@ import java.util.List;
 import github.abnvanand.washeteria.DayviewActivity;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
-import github.abnvanand.washeteria.data.model.Location;
-import github.abnvanand.washeteria.data.model.Machine;
-import github.abnvanand.washeteria.ui.signin.SigninActivity;
+import github.abnvanand.washeteria.models.Location;
+import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.ui.login.LoginActivity;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             startActivity(
                     new Intent(MainActivity.this,
-                            SigninActivity.class));
+                            LoginActivity.class));
             return true;
         }
 

@@ -8,7 +8,7 @@ import androidx.room.Query;
 
 import java.util.List;
 
-import github.abnvanand.washeteria.data.model.Machine;
+import github.abnvanand.washeteria.models.Machine;
 
 @Dao
 public interface MachineDao {
