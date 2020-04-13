@@ -28,6 +28,7 @@ public class AppRepository {
 
 
     private AppDatabase mDb;
+    private WebService webService;
 
     /**
      * All room db operations must be executed in a background thread
@@ -48,6 +49,9 @@ public class AppRepository {
 
     private AppRepository(Context context) {
         mDb = AppDatabase.getInstance(context);
+        webService = RetrofitSingleton
+                .getRetrofitInstance()
+                .create(WebService.class);
     }
 
 
@@ -58,9 +62,6 @@ public class AppRepository {
 
     private void getMachinesByLocationidFromWeb(String locationId) {
         // Call REST API to get most recent list of machines of selected location
-        WebService webService = RetrofitSingleton.getRetrofitInstance()
-                .create(WebService.class);
-
         webService.getMachines(locationId)
                 .enqueue(new Callback<List<Machine>>() {
                     @Override
@@ -79,7 +80,7 @@ public class AppRepository {
                     @Override
                     public void onFailure(@NotNull Call<List<Machine>> call,
                                           @NotNull Throwable t) {
-                        Timber.d(t.getLocalizedMessage());
+                        showError(t.getLocalizedMessage());
                     }
                 });
 
@@ -113,8 +114,6 @@ public class AppRepository {
     }
 
     private void fetchLocationsFromWeb() {
-        WebService webService = RetrofitSingleton.getRetrofitInstance()
-                .create(WebService.class);
         webService.getLocations()
                 .enqueue(new Callback<List<Location>>() {
                     @Override
@@ -133,7 +132,7 @@ public class AppRepository {
                     @Override
                     public void onFailure(@NotNull Call<List<Location>> call,
                                           @NotNull Throwable t) {
-                        Timber.e(t.getLocalizedMessage());
+                        showError(t.getLocalizedMessage());
                     }
                 });
     }
