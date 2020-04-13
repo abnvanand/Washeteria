@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public class Location {
     @PrimaryKey
     @NonNull
-    @SerializedName("locationId")
+    @SerializedName("id")
     private String id;
 
-    @SerializedName("locationName")
+    @SerializedName("name")
     private String name;
 
     // TODO: Add a list of machines

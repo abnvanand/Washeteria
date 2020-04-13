@@ -8,19 +8,21 @@ import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "machines", primaryKeys = {"id", "locationId"})
 public class Machine {
-    @SerializedName("machineId")
+    @SerializedName("id")
     @NonNull
     private String id;
 
-    @SerializedName("machineName")
+    @SerializedName("name")
     private String name;
 
 
     @SerializedName("locationId")
     @NonNull
     private String locationId;  // reverse mapping
+
     @SerializedName("status")
     private String status;  // Vacant / Occupied / Malfunctioned
+
     @SerializedName("remainingTime")
     private String remainingTime; // Set if status == Occupied
     // TODO: Add a list of events of this machine
