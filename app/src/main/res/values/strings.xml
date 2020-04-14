@@ -115,4 +115,8 @@
     <string name="prompt_select_location">Select location</string>
     <string name="action_logout">Logout</string>
     <string name="logout_success">Logged out</string>
+    <string name="action_today">Today</string>
+    <string name="action_day_view">Day view</string>
+    <string name="action_three_day_view">3 day view</string>
+    <string name="action_week_view">Week view</string>
 </resources>

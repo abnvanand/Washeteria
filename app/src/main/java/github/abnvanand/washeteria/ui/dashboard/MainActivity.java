@@ -23,7 +23,7 @@ import com.google.android.material.internal.NavigationMenu;
 import java.util.ArrayList;
 import java.util.List;
 
-import github.abnvanand.washeteria.DayviewActivity;
+import github.abnvanand.washeteria.ui.events.EventsActivity;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.models.Location;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMenuItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_calendar) {
-            startActivity(new Intent(MainActivity.this, DayviewActivity.class));
+            startActivity(new Intent(MainActivity.this, EventsActivity.class));
         }
         return false;
     }

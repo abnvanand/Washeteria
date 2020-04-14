@@ -1,4 +1,4 @@
-package github.abnvanand.washeteria;
+package github.abnvanand.washeteria.ui.events;
 
 import com.alamkanak.weekview.WeekViewDisplayable;
 import com.alamkanak.weekview.WeekViewEvent;
