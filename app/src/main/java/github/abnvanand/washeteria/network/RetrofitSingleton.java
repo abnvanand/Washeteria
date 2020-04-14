@@ -33,4 +33,16 @@ public class RetrofitSingleton {
 
         return instance;
     }
+
+    // To be called whenever the user login data changes
+    // i.e. whenever login or logout request is made
+    // Why on login
+    //       reset so that future requests would obtain a new instance
+    //       which would contain an auth interceptor
+    // Why on logout
+    //       reset so that future requests would obtain a new instance
+    //       which would not contain an auth interceptor
+    public static void reset() {
+        instance = null;
+    }
 }
