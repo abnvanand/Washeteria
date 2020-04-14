@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.lifecycle.MutableLiveData;
 
+import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -61,8 +62,13 @@ public class LoginRepository {
                     @Override
                     public void onResponse(Call<LoggedInUser> call, Response<LoggedInUser> response) {
                         if (!response.isSuccessful()) {
-//                            loginResultObservable.postValue(new Result.Error(new IOException(response.message())));
-                            showError(response.message());
+                            clearFromSharedPrefs();
+
+                            loggedInStatusObservable
+                                    .postValue(new LoggedInStatus(false,
+                                            null,
+                                            new IOException(response.message())));
+
                             return;
                         }
                         LoggedInUser loggedInUser = response.body();
@@ -79,6 +85,9 @@ public class LoginRepository {
                     public void onFailure(Call<LoggedInUser> call, Throwable t) {
 //                        loginResultObservable.postValue(new Result.Error(new IOException(t.getLocalizedMessage())));
                         clearFromSharedPrefs();
+                        loggedInStatusObservable.postValue(new LoggedInStatus(false,
+                                null,
+                                new IOException(t.getLocalizedMessage())));
                     }
                 });
     }
@@ -88,7 +97,7 @@ public class LoginRepository {
 
         // Clear sharedPrefs
         clearFromSharedPrefs();
-        loggedInStatusObservable.postValue(new LoggedInStatus(false, null));
+        loggedInStatusObservable.postValue(new LoggedInStatus(false, null, null));
 
         // TODO: reset retrofit instance
 
@@ -130,7 +139,11 @@ public class LoginRepository {
                 loggedInUser.setExpiresAt(mSessionManager.getExpiresAt());
 
                 // Notify observers
-                loggedInStatusObservable.postValue(new LoggedInStatus(true, loggedInUser));
+                loggedInStatusObservable.postValue(
+                        new LoggedInStatus(
+                                true,
+                                loggedInUser,
+                                null));
 
             }
         });

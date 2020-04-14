@@ -105,6 +105,15 @@ public class LoginActivity extends AppCompatActivity {
                     if (loggedInStatus == null)
                         return;
 
+                    if (loggedInStatus.getError() != null) {
+                        loadingProgressBar.setVisibility(View.GONE);
+                        Toast.makeText(this,
+                                loggedInStatus.getError().getLocalizedMessage(),
+                                Toast.LENGTH_LONG)
+                                .show();
+                        return;
+                    }
+
                     if (loggedInStatus.isLoggedIn()) {
                         updateUIAfterLogin(loggedInStatus.getUser());
                     } else {
