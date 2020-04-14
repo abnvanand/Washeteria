@@ -8,20 +8,38 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitSingleton {
     private static Retrofit instance;
+    private static Retrofit authInstance;
 
     private RetrofitSingleton() {
     }
 
+    // FIXME: merge authorizedInstance and instance into 1
+    public static Retrofit getAuthorizedInstance(String token) {
+        if (authInstance == null) {
+            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
+            // Add auth interceptor if token exists
+            addAuthInterceptor(token, httpClient);
+
+            // Add logging as last interceptor
+            addLogginInterceptor(httpClient);
+
+
+            authInstance = new Retrofit.Builder()
+                    .baseUrl(BuildConfig.BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(httpClient.build())
+                    .build();
+        }
+
+        return authInstance;
+    }
+
     public static Retrofit getRetrofitInstance() {
         if (instance == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            // Set desired log level NONE, BASIC, HEADERS or body
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            // add your other interceptors
-            // add logging as last interceptor
-            httpClient.addInterceptor(logging);
+            // Add logging as last interceptor
+            addLogginInterceptor(httpClient);
 
 
             instance = new Retrofit.Builder()
@@ -34,6 +52,20 @@ public class RetrofitSingleton {
         return instance;
     }
 
+    private static void addAuthInterceptor(String token,
+                                           OkHttpClient.Builder httpClient) {
+        httpClient.addInterceptor(new AuthInterceptor(token));
+    }
+
+    private static void addLogginInterceptor(OkHttpClient.Builder httpClient) {
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        // Set desired log level NONE, BASIC, HEADERS or body
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        // add your other interceptors
+        httpClient.addInterceptor(loggingInterceptor);
+    }
+
     // To be called whenever the user login data changes
     // i.e. whenever login or logout request is made
     // Why on login
@@ -43,6 +75,6 @@ public class RetrofitSingleton {
     //       reset so that future requests would obtain a new instance
     //       which would not contain an auth interceptor
     public static void reset() {
-        instance = null;
+        authInstance = null;
     }
 }
