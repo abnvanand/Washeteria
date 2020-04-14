@@ -10,71 +10,77 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import github.abnvanand.washeteria.R;
-import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.repositories.LoginRepository;
-import github.abnvanand.washeteria.repositories.Result;
-import github.abnvanand.washeteria.shareprefs.SessionManager;
 
 public class LoginViewModel extends AndroidViewModel {
+    private MediatorLiveData<LoggedInStatus> loggedInStatusObservable = new MediatorLiveData<LoggedInStatus>();
 
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
+//    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
 
-    private MediatorLiveData<Result> loginResultObservable = new MediatorLiveData<>();
+//    private MediatorLiveData<Result> loginResultObservable = new MediatorLiveData<>();
 
-    private MutableLiveData<Boolean> loggedInStatus = new MutableLiveData<>();
-    private LoginRepository loginRepository;
-    private SessionManager sessionManager;
-    private boolean firstLoad = true;
+    //    private MutableLiveData<Boolean> loggedInStatus = new MutableLiveData<>();
+    private LoginRepository mRepository;
+//    private SessionManager sessionManager;
+//    private boolean firstLoad = true;
 
     public LoginViewModel(@NonNull Application application) {
         super(application);
-        sessionManager = new SessionManager(application);
-        this.loginRepository = LoginRepository.getInstance();
+        mRepository = LoginRepository.getInstance(application.getApplicationContext());
 
-        loginResultObservable.addSource(loginRepository.getLoginResultObservable(),
-                result -> {
-//                    loginResultObservable.setValue(result);
-                    if (result instanceof Result.Success) {
-                        LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-                        loginResult.setValue(new LoginResult(new LoggedInUserView(data.getUsername(), data.getToken(), data.getExpiresAt())));
-                        loggedInStatus.setValue(true);
-                        sessionManager.saveSession(data);
-                    } else {
-                        loginResult.setValue(new LoginResult(R.string.login_failed));
-                        loggedInStatus.setValue(false);
-                    }
+        mRepository.fetchLoggedInStatus();
+
+        loggedInStatusObservable.addSource(mRepository.getLoggedInStatusObservable(),
+                loggedInStatus -> {
+            loggedInStatusObservable.setValue(loggedInStatus);
                 });
+
+
+//        loginResultObservable.addSource(mRepository.getLoginResultObservable(),
+//                result -> {
+//                    loginResultObservable.setValue(result);
+//                    if (result instanceof Result.Success) {
+//                        LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
+//                        loginResult.setValue(new LoginResult(new LoggedInUserView(data.getUsername(), data.getToken(), data.getExpiresAt())));
+//                        loggedInStatus.setValue(true);
+//                        sessionManager.saveSession(data);
+//                    } else {
+//                        loginResult.setValue(new LoginResult(R.string.login_failed));
+//                        loggedInStatus.setValue(false);
+//                    }
+//                });
     }
 
     LiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
 
-    LiveData<LoginResult> getLoginResult() {
-        return loginResult;
-    }
+//    LiveData<LoginResult> getLoginResult() {
+//        return loginResult;
+//    }
 
-    LiveData<Boolean> getLoggedInStatus() {
-        if (firstLoad) {
-            firstLoad = false;
-            loggedInStatus.setValue(sessionManager.isLoggedIn());
-        }
+//    LiveData<Boolean> getLoggedInStatus() {
+//        if (firstLoad) {
+//            firstLoad = false;
+//            loggedInStatus.setValue(sessionManager.isLoggedIn());
+//        }
+//
+//        return loggedInStatus;
+//    }
 
-        return loggedInStatus;
+
+    public LiveData<LoggedInStatus> getLoggedInStatusObservable() {
+        return loggedInStatusObservable;
     }
 
     public void login(String username, String password) {
         // can be launched in a separate asynchronous job
-        loginRepository.login(username, password);
+        mRepository.login(username, password);
     }
 
     public void logout() {
-        // TODO: Send logout request
-        loginResult.setValue(new LoginResult(R.string.logout_success));
-
-        sessionManager.clearSession();
-        loggedInStatus.setValue(false);
+        mRepository.logout();
     }
 
     public void loginDataChanged(String username, String password) {

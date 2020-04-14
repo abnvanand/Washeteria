@@ -1,7 +1,6 @@
 package github.abnvanand.washeteria.shareprefs;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
@@ -16,8 +15,8 @@ public class SessionManager {
     private static final String PREF_EXPIRES_AT = "expiresAt";
     private Context context;
 
-    public SessionManager(Application application) {
-        context = application.getApplicationContext();
+    public SessionManager(Context context) {
+        this.context = context;
     }
 
 

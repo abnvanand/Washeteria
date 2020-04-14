@@ -1,6 +1,5 @@
 package github.abnvanand.washeteria.ui.login;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,49 +16,75 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import github.abnvanand.washeteria.R;
+import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
 
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
-    private TextView textViewUsername;
-    private TextView textViewToken;
-    private TextView textViewExpiresAt;
+
+    private View loginForm;
+    private EditText usernameEditText, passwordEditText;
+    private ProgressBar loadingProgressBar;
+    private Button loginButton;
+
+    private View logoutForm;
+    private TextView textViewUsername, textViewToken, textViewExpiresAt;
+    private Button logoutButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        loginViewModel = new ViewModelProvider(this)
-                .get(LoginViewModel.class);
 
-        View loginForm = findViewById(R.id.loginForm);
-        View logoutForm = findViewById(R.id.logoutForm);
-
-
-        final EditText usernameEditText = findViewById(R.id.username);
-        final EditText passwordEditText = findViewById(R.id.password);
-        final Button loginButton = findViewById(R.id.login);
-        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        loginForm = findViewById(R.id.loginForm);
+        logoutForm = findViewById(R.id.logoutForm);
+        usernameEditText = findViewById(R.id.username);
+        passwordEditText = findViewById(R.id.password);
+        loginButton = findViewById(R.id.login);
+        loadingProgressBar = findViewById(R.id.loading);
         textViewUsername = findViewById(R.id.textViewUsername);
         textViewToken = findViewById(R.id.textViewToken);
         textViewExpiresAt = findViewById(R.id.textViewExpiresAt);
-        final Button logoutButton = findViewById(R.id.btnLogout);
+        logoutButton = findViewById(R.id.btnLogout);
 
-        loginViewModel.getLoggedInStatus()
-                .observe(this, isLoggedIn -> {
-                    if (isLoggedIn) {
-                        loginForm.setVisibility(View.INVISIBLE);
-                        logoutForm.setVisibility(View.VISIBLE);
+        setupUIListeners();
+        initViewModel();
 
-                        updateLogoutPageWithLoggedInUser();
+//        loginViewModel.getLoginResult()
+//                .observe(this, loginResult -> {
+//                    Timber.d("Here1");
+//                    if (loginResult == null) {
+//                        Timber.d("Here2");
+//                        return;
+//                    }
+//                    Timber.d("Here3");
+//                    loadingProgressBar.setVisibility(View.GONE);
+//
+//                    if (loginResult.getError() != null) {
+//                        Timber.d("Here4");
+//                        showLoginFailed(loginResult.getError());
+//                        return;
+//                    }
+//                    Timber.d("Here5");
+//
+//                    if (loginResult.getSuccess() != null) {
+//                        Timber.d("Here6");
+//                        updateUiWithUser(loginResult.getSuccess());
+//                    }
+//
+//                    setResult(Activity.RESULT_OK);
+//
+//                    //Complete and destroy login activity once successful
+//                    finish();
+//                });
 
-                    } else {
-                        logoutForm.setVisibility(View.INVISIBLE);
-                        loginForm.setVisibility(View.VISIBLE);
-                    }
-                });
 
+    }
+
+    private void initViewModel() {
+        loginViewModel = new ViewModelProvider(this)
+                .get(LoginViewModel.class);
 
         loginViewModel.getLoginFormState()
                 .observe(this, loginFormState -> {
@@ -75,28 +100,39 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-        loginViewModel.getLoginResult()
-                .observe(this, loginResult -> {
-                    if (loginResult == null) {
+        loginViewModel.getLoggedInStatusObservable().observe(this,
+                loggedInStatus -> {
+                    if (loggedInStatus == null)
                         return;
+
+                    if (loggedInStatus.isLoggedIn()) {
+                        updateUIAfterLogin(loggedInStatus.getUser());
+                    } else {
+                        updateUIAfterLogout();
                     }
-                    loadingProgressBar.setVisibility(View.GONE);
-
-                    if (loginResult.getError() != null) {
-                        showLoginFailed(loginResult.getError());
-                        return;
-                    }
-
-                    if (loginResult.getSuccess() != null) {
-                        updateUiWithUser(loginResult.getSuccess());
-                    }
-
-                    setResult(Activity.RESULT_OK);
-
-                    //Complete and destroy login activity once successful
-                    finish();
                 });
+    }
 
+    private void updateUIAfterLogout() {
+        loadingProgressBar.setVisibility(View.GONE);
+        textViewUsername.setText("");
+        textViewToken.setText("");
+        textViewExpiresAt.setText("");
+        logoutForm.setVisibility(View.INVISIBLE);
+        loginForm.setVisibility(View.VISIBLE);
+    }
+
+    private void updateUIAfterLogin(LoggedInUser user) {
+        loadingProgressBar.setVisibility(View.GONE);
+        loginForm.setVisibility(View.INVISIBLE);
+        logoutForm.setVisibility(View.VISIBLE);
+        textViewUsername.setText(user.getUsername());
+        textViewToken.setText(user.getToken());
+        textViewExpiresAt.setText(user.getExpiresAt());
+    }
+
+
+    private void setupUIListeners() {
         TextWatcher afterTextChangedListener = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -141,11 +177,12 @@ public class LoginActivity extends AppCompatActivity {
         textViewExpiresAt.setText(manager.getExpiresAt());
     }
 
-    private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-    }
+
+//    private void updateUiWithUser(LoggedInUserView model) {
+//        String welcome = getString(R.string.welcome) + model.getDisplayName();
+//        // TODO : initiate successful logged in experience
+//        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+//    }
 
     private void showLoginFailed(@StringRes Integer errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
