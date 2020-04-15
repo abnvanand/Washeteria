@@ -31,6 +31,7 @@
         android:layout_height="match_parent"
         app:columnGap="1dp"
         app:eventCornerRadius="4dp"
+        app:defaultEventColor="@color/colorAccent"
         app:eventTextColor="@android:color/white"
         app:headerRowBottomLineColor="@color/header_bottom_line"
         app:headerRowBottomLineWidth="1dp"

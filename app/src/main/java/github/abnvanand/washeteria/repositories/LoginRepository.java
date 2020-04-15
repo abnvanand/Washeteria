@@ -75,7 +75,8 @@ public class LoginRepository {
                         if (loggedInUser != null) {
                             addUserToSharedPrefs(loggedInUser);
 
-                            // TODO: Reset retrofit instance
+                            // Reset retrofit instance
+                            RetrofitSingleton.reset();
                         }
 
 //                        loginResultObservable.postValue(new Result.Success<LoggedInUser>(response.body()));
@@ -99,8 +100,8 @@ public class LoginRepository {
         clearFromSharedPrefs();
         loggedInStatusObservable.postValue(new LoggedInStatus(false, null, null));
 
-        // TODO: reset retrofit instance
-
+        // reset retrofit instance
+        RetrofitSingleton.reset();
     }
 
     private void clearFromSharedPrefs() {

@@ -8,12 +8,15 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import github.abnvanand.washeteria.database.converters.DateConverter;
+import github.abnvanand.washeteria.database.dao.EventDao;
 import github.abnvanand.washeteria.database.dao.LocationDao;
 import github.abnvanand.washeteria.database.dao.MachineDao;
+import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 
-@Database(entities = {Machine.class, Location.class}, version = 1)
+@Database(entities = {Machine.class, Location.class, Event.class},
+        version = 1)
 @TypeConverters(DateConverter.class)
 
 public abstract class AppDatabase extends RoomDatabase {
@@ -38,4 +41,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract MachineDao machineDao();
 
     public abstract LocationDao locationDao();
+
+    public abstract EventDao eventDao();
 }

@@ -5,12 +5,14 @@ import android.content.Context;
 import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import github.abnvanand.washeteria.database.AppDatabase;
+import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
@@ -21,10 +23,14 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class AppRepository {
-    private static AppRepository instance;
+    private static AppRepository instance;// TODO: Make volatile maybe?
     //    public MutableLiveData<List<Machine>> machines;
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
     private MutableLiveData<List<Location>> locationListObservable = new MutableLiveData<>();
+    private MutableLiveData<List<Event>> eventsByLocationObservable = new MutableLiveData<>();
+
+    private static final String REFRESH_EVENTS_BY_LOCATION_OBSERVERS = "REFRESH_EVENTS_BY_LOC";
+    private static final String REFRESH_EVENTS_BY_MACHINE_OBSERVERS = "REFRESH_EVENTS_BY_MACHINE";
 
 
     private AppDatabase mDb;
@@ -154,4 +160,113 @@ public class AppRepository {
             locationListObservable.postValue(queryResults);
         });
     }
+
+    // region events
+
+    // region events by location id
+    public void fetchEventsByLocation(String locationId) {
+        loadEventsByLocationFromDb(locationId);
+        getEventsFromWeb();
+    }
+
+    private void getEventsFromWeb() {
+        // Fetches event based on modifiedAfter timestamp
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // TODO: Try to get lastModifiedAt from local db so that we fetch only newer events
+                Long lastModifiedAt = null;
+//                long lastModifiedAt = mDb.eventDao().getLastModifiedAt();
+                webService.getEvents(lastModifiedAt)
+                        .enqueue(new Callback<List<Event>>() {
+                            @Override
+                            public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
+                                if (!response.isSuccessful()) {
+                                    showError(response.message());
+                                    return;
+                                }
+
+                                addEventsToDb(response.body(),
+                                        REFRESH_EVENTS_BY_LOCATION_OBSERVERS,
+                                        "1");   // Remove hardcoding
+                            }
+
+                            @Override
+                            public void onFailure(Call<List<Event>> call, Throwable t) {
+                                showError(t.getLocalizedMessage());
+                            }
+                        });
+            }
+        });
+    }
+
+    private void getEventsByLocationFromWeb(String locationId) {
+        // FIXME: call getEventsByLocation()
+        webService.getEvents(null)
+                .enqueue(new Callback<List<Event>>() {
+                    @Override
+                    public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
+                        if (!response.isSuccessful()) {
+                            showError(response.message());
+                            return;
+                        }
+
+                        if (response.body() != null) {
+                            addEventsToDb(
+                                    response.body(),
+                                    REFRESH_EVENTS_BY_LOCATION_OBSERVERS,
+                                    locationId);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Event>> call, Throwable t) {
+                        showError(t.getLocalizedMessage());
+                    }
+                });
+    }
+
+    private void loadEventsByLocationFromDb(String locationId) {
+        executor.execute(() -> {
+            List<Event> queryResults = mDb.eventDao().getAllByLocationId(locationId);
+            eventsByLocationObservable.postValue(queryResults);
+        });
+    }
+
+    public MutableLiveData<List<Event>> getEventsByLocationObservable() {
+        return eventsByLocationObservable;
+    }
+
+    // endregion events by location id
+
+
+    // region events by machine id
+
+    public void fetchEventsByMachine(String machineId) {
+
+    }
+
+    private void loadEventsByMachineFromDb(String machineId) {
+
+    }
+
+    // endregion events by machine id
+
+
+    private void addEventsToDb(List<Event> body,
+                               @Nullable String REFRESH_TYPE,
+                               @Nullable String REFRESH_KEY) {
+        executor.execute(() -> {
+            mDb.eventDao().insertAll(body);
+
+            if (REFRESH_EVENTS_BY_LOCATION_OBSERVERS.equals(REFRESH_TYPE)) {
+                loadEventsByLocationFromDb(REFRESH_KEY);
+            } else if (REFRESH_EVENTS_BY_MACHINE_OBSERVERS.equals(REFRESH_TYPE)) {
+                loadEventsByMachineFromDb(REFRESH_KEY);
+            }
+        });
+    }
+
+    // endregion events
+
 }

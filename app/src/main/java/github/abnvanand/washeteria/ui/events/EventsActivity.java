@@ -6,6 +6,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewDisplayable;
@@ -15,10 +17,15 @@ import java.util.Calendar;
 import java.util.List;
 
 import github.abnvanand.washeteria.R;
+import github.abnvanand.washeteria.models.Event;
+import github.abnvanand.washeteria.utils.DateConverters;
+import timber.log.Timber;
 
 public class EventsActivity extends AppCompatActivity {
 
-    WeekView<MyEvent> weekView;
+    private WeekView<BookingEvent> weekView;
+    private EventsViewModel mViewModel;
+    ArrayList<Integer> eventColors = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,21 +34,37 @@ public class EventsActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
+        eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
+        eventColors.add(ContextCompat.getColor(this, R.color.event_color_03));
+        eventColors.add(ContextCompat.getColor(this, R.color.event_color_04));
 
         weekView = findViewById(R.id.weekView);
 
         limitWeekViewRange();
 
-        // TODO: setup ViewModel to get events
-        loadDummyEvents();
+        // TODO: get locationId from intent
+        initViewModel("1");// FIXME Hardcoding
 
         setupListeners();
     }
 
+    private void initViewModel(String locationId) {
+        mViewModel = new ViewModelProvider(this)
+                .get(EventsViewModel.class);
+        mViewModel.getData(locationId);
+        mViewModel.getEventsByLocationObservable()
+                .observe(this, events -> {
+                    fillCalendarView(events);
+                });
+
+    }
+
     private void setupListeners() {
-        weekView.setOnEventClickListener((myEvent, eventRect) -> {
+        weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
             Toast.makeText(EventsActivity.this,
-                    "Clicked event: " + myEvent.startTime.getTime(), Toast.LENGTH_LONG).show();
+                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_LONG)
+                    .show();
 
         });
 
@@ -61,21 +84,35 @@ public class EventsActivity extends AppCompatActivity {
         weekView.setMaxDate(max);
     }
 
-    private void loadDummyEvents() {
-        List<WeekViewDisplayable<MyEvent>> events = new ArrayList<>();
-        Calendar startDate = Calendar.getInstance();
-        Calendar endDate = Calendar.getInstance();
-        endDate.add(Calendar.HOUR_OF_DAY, +2);
+    private void fillCalendarView(List<Event> events) {
+        List<WeekViewDisplayable<BookingEvent>> weekViewDisplayableList = new ArrayList<>();
 
-        events.add(new MyEvent(1,
-                "Got to gym",
-                startDate,
-                endDate,
-                "Home",
-                R.color.colorAccent,
-                false,
-                false));
-        weekView.submit(events);
+        for (int i = 0; i < events.size(); i++) {
+            Event event = events.get(i);
+            Calendar eventStartCal = DateConverters.getCalendarFromString(event.getStartsAt());
+            Calendar eventEndCal = DateConverters.getCalendarFromString(event.getEndsAt());
+            Timber.d("Adding event%s\nfrom %s to %s",
+                    event.getId(),
+                    eventStartCal.getTime(),
+                    eventEndCal.getTime());
+
+            BookingEvent bookingEvent = new
+                    BookingEvent(
+                    i,
+                    eventStartCal,
+                    eventEndCal,
+                    event.isCancelled(),
+                    String.format("Event %s\nLocation %s\nMachine %s",
+                            event.getId(),
+                            event.getLocationId(),
+                            event.getMachineId()),
+                    event.getCreator(),
+                    eventColors.get(i % eventColors.size())
+            );
+            weekViewDisplayableList.add(bookingEvent);
+        }
+
+        weekView.submit(weekViewDisplayableList);
     }
 
     @Override
