@@ -27,14 +27,17 @@ import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
-import github.abnvanand.washeteria.ui.events.EventsActivity;
+import github.abnvanand.washeteria.ui.events.EventsForMachineActivity;
+import github.abnvanand.washeteria.ui.events.ViewSlotsActivity;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
+import github.abnvanand.washeteria.utils.ItemClickSupport;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
     public static final String EXTRA_SELECTED_LOCATION_ID = "EXTRA_CURR_LOC_ID";
+    public static final String EXTRA_SELECTED_MACHINE_ID = "EXTRA_SELECTED_MACHINE";
     private Location currentLocation;
 
     private List<Machine> machines = new ArrayList<>();
@@ -74,6 +77,14 @@ public class MainActivity extends AppCompatActivity
         DividerItemDecoration divider = new DividerItemDecoration(
                 mRecyclerView.getContext(), layoutManager.getOrientation());
         mRecyclerView.addItemDecoration(divider);
+
+        ItemClickSupport.addTo(mRecyclerView)
+                .setOnItemClickListener((recyclerView, position, v) -> {
+                    Intent intent = new Intent(MainActivity.this,
+                            EventsForMachineActivity.class);
+                    intent.putExtra(EXTRA_SELECTED_MACHINE_ID, machineAdapter.getItem(position).getId());
+                    startActivity(intent);
+                });
     }
 
     private void initViewModel() {
@@ -110,7 +121,8 @@ public class MainActivity extends AppCompatActivity
                         android.R.layout.simple_spinner_item,
                         locations);
 
-        locationArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        locationArrayAdapter
+                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // attaching data adapter to spinner
         spinner.setAdapter(locationArrayAdapter);
@@ -170,7 +182,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onMenuItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_calendar) {
-            Intent intent = new Intent(MainActivity.this, EventsActivity.class);
+            Intent intent = new Intent(MainActivity.this, ViewSlotsActivity.class);
             intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
             startActivity(intent);
         }

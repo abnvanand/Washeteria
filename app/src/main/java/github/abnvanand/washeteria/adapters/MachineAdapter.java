@@ -24,6 +24,9 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomVi
         this.dataList = dataList;
     }
 
+    public Machine getItem(int position) {
+        return dataList.get(position);
+    }
 
     class CustomViewHolder extends RecyclerView.ViewHolder {
 

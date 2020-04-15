@@ -28,6 +28,7 @@ public class AppRepository {
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
     private MutableLiveData<List<Location>> locationListObservable = new MutableLiveData<>();
     private MutableLiveData<List<Event>> eventsByLocationObservable = new MutableLiveData<>();
+    private MutableLiveData<List<Event>> eventsByMachineObservable = new MutableLiveData<>();
 
     private static final String REFRESH_EVENTS_BY_LOCATION_OBSERVERS = "REFRESH_EVENTS_BY_LOC";
     private static final String REFRESH_EVENTS_BY_MACHINE_OBSERVERS = "REFRESH_EVENTS_BY_MACHINE";
@@ -200,7 +201,7 @@ public class AppRepository {
         });
     }
 
-    private void getEventsByLocationFromWeb(String locationId) {
+   /* private void getEventsByLocationFromWeb(String locationId) {
         // FIXME: call getEventsByLocation()
         webService.getEvents(null)
                 .enqueue(new Callback<List<Event>>() {
@@ -224,7 +225,7 @@ public class AppRepository {
                         showError(t.getLocalizedMessage());
                     }
                 });
-    }
+    }*/
 
     private void loadEventsByLocationFromDb(String locationId) {
         executor.execute(() -> {
@@ -237,17 +238,56 @@ public class AppRepository {
         return eventsByLocationObservable;
     }
 
+    public MutableLiveData<List<Event>> getEventsByMachineObservable() {
+        return eventsByMachineObservable;
+    }
+
     // endregion events by location id
 
 
     // region events by machine id
 
     public void fetchEventsByMachine(String machineId) {
+        loadEventsByMachineFromDb(machineId);
+        getEventsByMachineFromWeb(machineId);
+    }
 
+    private void getEventsByMachineFromWeb(String machineId) {
+        // Fetches event based on modifiedAfter timestamp
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                // TODO: Try to get lastModifiedAt from local db so that we fetch only newer events
+                Long lastModifiedAt = null;
+//                long lastModifiedAt = mDb.eventDao().getLastModifiedAt();
+                webService.getEvents(lastModifiedAt)
+                        .enqueue(new Callback<List<Event>>() {
+                            @Override
+                            public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
+                                if (!response.isSuccessful()) {
+                                    showError(response.message());
+                                    return;
+                                }
+
+                                addEventsToDb(response.body(),
+                                        REFRESH_EVENTS_BY_MACHINE_OBSERVERS,
+                                        machineId);
+                            }
+
+                            @Override
+                            public void onFailure(Call<List<Event>> call, Throwable t) {
+                                showError(t.getLocalizedMessage());
+                            }
+                        });
+            }
+        });
     }
 
     private void loadEventsByMachineFromDb(String machineId) {
-
+        executor.execute(() -> {
+            List<Event> queryResults = mDb.eventDao().getAllByMachineId(machineId);
+            eventsByMachineObservable.postValue(queryResults);
+        });
     }
 
     // endregion events by machine id

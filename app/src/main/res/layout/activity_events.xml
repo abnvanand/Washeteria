@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.events.EventsActivity">
+    tools:context=".ui.events.ViewSlotsActivity">
 
     <include layout="@layout/view_toolbar" />
     <!--    <com.alamkanak.weekview.WeekView-->

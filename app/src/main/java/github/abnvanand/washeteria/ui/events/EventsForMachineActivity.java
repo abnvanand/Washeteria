@@ -18,11 +18,12 @@ import java.util.List;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
-import github.abnvanand.washeteria.ui.dashboard.MainActivity;
 import github.abnvanand.washeteria.utils.DateConverters;
 import timber.log.Timber;
 
-public class EventsActivity extends AppCompatActivity {
+import static github.abnvanand.washeteria.ui.dashboard.MainActivity.EXTRA_SELECTED_MACHINE_ID;
+
+public class EventsForMachineActivity extends AppCompatActivity {
 
     private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
@@ -35,7 +36,7 @@ public class EventsActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        String locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
+        String machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
 
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
@@ -46,17 +47,18 @@ public class EventsActivity extends AppCompatActivity {
 
         limitWeekViewRange();
 
-        // TODO: get locationId from intent
-        initViewModel(locationId);// FIXME Hardcoding
+        initViewModel(machineId);
 
         setupListeners();
     }
 
-    private void initViewModel(String locationId) {
+    private void initViewModel(String machineId) {
         mViewModel = new ViewModelProvider(this)
                 .get(EventsViewModel.class);
-        mViewModel.getData(locationId);
-        mViewModel.getEventsByLocationObservable()
+
+        mViewModel.getDataByMachine(machineId);
+
+        mViewModel.getEventsByMachineObservable()
                 .observe(this, events -> {
                     fillCalendarView(events);
                 });
@@ -65,7 +67,7 @@ public class EventsActivity extends AppCompatActivity {
 
     private void setupListeners() {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
-            Toast.makeText(EventsActivity.this,
+            Toast.makeText(EventsForMachineActivity.this,
                     "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_LONG)
                     .show();
 
@@ -73,7 +75,8 @@ public class EventsActivity extends AppCompatActivity {
 
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
-            Toast.makeText(EventsActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_LONG).show();
+            Toast.makeText(EventsForMachineActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_LONG).show();
+
         });
     }
 
@@ -88,6 +91,7 @@ public class EventsActivity extends AppCompatActivity {
     }
 
     private void fillCalendarView(List<Event> events) {
+        Timber.d("Events: %s", events);
         List<WeekViewDisplayable<BookingEvent>> weekViewDisplayableList = new ArrayList<>();
 
         for (int i = 0; i < events.size(); i++) {
@@ -115,6 +119,7 @@ public class EventsActivity extends AppCompatActivity {
             weekViewDisplayableList.add(bookingEvent);
         }
 
+        // FIXME: gives NPE when a machine has no events
         weekView.submit(weekViewDisplayableList);
     }
 
