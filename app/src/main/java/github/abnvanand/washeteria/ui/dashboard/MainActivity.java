@@ -23,17 +23,19 @@ import com.google.android.material.internal.NavigationMenu;
 import java.util.ArrayList;
 import java.util.List;
 
-import github.abnvanand.washeteria.ui.events.EventsActivity;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.ui.events.EventsActivity;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
+    public static final String EXTRA_SELECTED_LOCATION_ID = "EXTRA_CURR_LOC_ID";
+    private Location currentLocation;
 
     private List<Machine> machines = new ArrayList<>();
     private MachineAdapter machineAdapter;
@@ -144,12 +146,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // On selecting a spinner item
-        Location location = (Location) parent.getItemAtPosition(position);
+        currentLocation = (Location) parent.getItemAtPosition(position);
 
         // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + location.getName(), Toast.LENGTH_LONG).show();
+        Toast.makeText(parent.getContext(), "Selected: " + currentLocation.getName(), Toast.LENGTH_LONG).show();
 
-        mViewModel.getData(location.getId());
+        mViewModel.getData(currentLocation.getId());
         pullToRefresh.setRefreshing(true);
     }
 
@@ -168,7 +170,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onMenuItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_calendar) {
-            startActivity(new Intent(MainActivity.this, EventsActivity.class));
+            Intent intent = new Intent(MainActivity.this, EventsActivity.class);
+            intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
+            startActivity(intent);
         }
         return false;
     }

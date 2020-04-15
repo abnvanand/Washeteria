@@ -166,10 +166,10 @@ public class AppRepository {
     // region events by location id
     public void fetchEventsByLocation(String locationId) {
         loadEventsByLocationFromDb(locationId);
-        getEventsFromWeb();
+        getEventsFromWeb(locationId);
     }
 
-    private void getEventsFromWeb() {
+    private void getEventsFromWeb(String locationId) {
         // Fetches event based on modifiedAfter timestamp
         executor.execute(new Runnable() {
             @Override
@@ -188,7 +188,7 @@ public class AppRepository {
 
                                 addEventsToDb(response.body(),
                                         REFRESH_EVENTS_BY_LOCATION_OBSERVERS,
-                                        "1");   // Remove hardcoding
+                                        locationId);
                             }
 
                             @Override

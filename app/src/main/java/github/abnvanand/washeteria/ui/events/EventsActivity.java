@@ -18,6 +18,7 @@ import java.util.List;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
+import github.abnvanand.washeteria.ui.dashboard.MainActivity;
 import github.abnvanand.washeteria.utils.DateConverters;
 import timber.log.Timber;
 
@@ -34,6 +35,8 @@ public class EventsActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        String locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
+
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_03));
@@ -44,7 +47,7 @@ public class EventsActivity extends AppCompatActivity {
         limitWeekViewRange();
 
         // TODO: get locationId from intent
-        initViewModel("1");// FIXME Hardcoding
+        initViewModel(locationId);// FIXME Hardcoding
 
         setupListeners();
     }
