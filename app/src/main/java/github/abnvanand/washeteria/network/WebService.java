@@ -6,11 +6,13 @@ import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import github.abnvanand.washeteria.models.pojo.LoginRequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -27,4 +29,9 @@ public interface WebService {
     @GET("/events")
     Call<List<Event>> getEvents(@Query("modifiedAfter") Long modifiedAfter);
 
+    @PUT("/events")
+    Call<Event> cancelEvent(@Body Event eventToCancel);
+
+    @POST("/events")
+    Call<Event> createEvent(@Body EventCreateBody eventToCreate);
 }

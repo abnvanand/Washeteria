@@ -26,6 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.events.ReserveSlotActivity" />
+        <activity android:name=".ui.events.CancelReservationActivity" />
     </application>
 
 </manifest>

@@ -6,8 +6,6 @@ import androidx.room.Ignore;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.sql.Timestamp;
-
 @Entity(tableName = "events", primaryKeys = {"id"})
 public class Event {
     @SerializedName("id")
@@ -33,8 +31,8 @@ public class Event {
     private String creator;
 
     @Ignore
-    public Event() {
-
+    public Event(@NonNull String id) {
+        this.id = id;
     }
 
     public Event(@NonNull String id, String startsAt, String endsAt, String modifiedAt, boolean cancelled, String machineId, String locationId, String creator) {

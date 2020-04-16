@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
         currentLocation = (Location) parent.getItemAtPosition(position);
 
         // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + currentLocation.getName(), Toast.LENGTH_LONG).show();
+        Toast.makeText(parent.getContext(), "Selected: " + currentLocation.getName(), Toast.LENGTH_SHORT).show();
 
         mViewModel.getData(currentLocation.getId());
         pullToRefresh.setRefreshing(true);

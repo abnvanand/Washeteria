@@ -65,14 +65,14 @@ public class ViewSlotsActivity extends AppCompatActivity {
     private void setupListeners() {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
             Toast.makeText(ViewSlotsActivity.this,
-                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_LONG)
+                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_SHORT)
                     .show();
 
         });
 
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
-            Toast.makeText(ViewSlotsActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_LONG).show();
+            Toast.makeText(ViewSlotsActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_SHORT).show();
         });
     }
 

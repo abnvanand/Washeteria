@@ -10,6 +10,7 @@ import java.util.List;
 
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.repositories.AppRepository;
+import github.abnvanand.washeteria.shareprefs.SessionManager;
 
 public class EventsViewModel extends AndroidViewModel {
     private AppRepository mRepository;

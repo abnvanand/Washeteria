@@ -1,5 +1,6 @@
 package github.abnvanand.washeteria.ui.events;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,8 @@ import java.util.List;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
+import github.abnvanand.washeteria.ui.login.LoggedInStatus;
+import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.DateConverters;
 import timber.log.Timber;
 
@@ -25,9 +28,17 @@ import static github.abnvanand.washeteria.ui.dashboard.MainActivity.EXTRA_SELECT
 
 public class EventsForMachineActivity extends AppCompatActivity {
 
+    public static final String EXTRA_MACHINE_ID = "machine_id";
+    public static final String EXTRA_CLICKED_MILLIS = "calendar_object";
+    public static final String EXTRA_EVENT_ID = "clicked_event_id";
+    private LoggedInStatus mLoggedInStatus;
+
     private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
+    private LoginViewModel loginViewModel;
+
     ArrayList<Integer> eventColors = new ArrayList<>();
+    String machineId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +47,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        String machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
+        machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
 
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
@@ -53,6 +64,14 @@ public class EventsForMachineActivity extends AppCompatActivity {
     }
 
     private void initViewModel(String machineId) {
+        loginViewModel = new ViewModelProvider(this)
+                .get(LoginViewModel.class);
+
+        loginViewModel.getLoggedInStatusObservable()
+                .observe(this, loggedInStatus -> {
+                    mLoggedInStatus = loggedInStatus;
+                });
+
         mViewModel = new ViewModelProvider(this)
                 .get(EventsViewModel.class);
 
@@ -68,15 +87,48 @@ public class EventsForMachineActivity extends AppCompatActivity {
     private void setupListeners() {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
             Toast.makeText(EventsForMachineActivity.this,
-                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_LONG)
+                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_SHORT)
                     .show();
+            String creator = bookingEvent.getCreator();
+
+
+            // Open cancel Activity only if currently logged in user is the creator of this event
+            if (mLoggedInStatus == null
+                    || !mLoggedInStatus.isLoggedIn()
+                    || mLoggedInStatus.getUser() == null
+                    || !creator.equals(mLoggedInStatus.getUser().getUsername())) {
+                Toast.makeText(this, "Only owner can edit a reservation", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Intent intent = new Intent(this, CancelReservationActivity.class);
+            intent.putExtra(EXTRA_EVENT_ID, String.valueOf(bookingEvent.getId())); // event object which contains event id
+            startActivity(intent);
 
         });
 
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
-            Toast.makeText(EventsForMachineActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_LONG).show();
+            Toast.makeText(EventsForMachineActivity.this,
+                    "Book this slot: " + calendar.getTime(),
+                    Toast.LENGTH_SHORT).show();
 
+            // TODO: make sure
+            if (mLoggedInStatus == null
+                    || !mLoggedInStatus.isLoggedIn()
+                    || mLoggedInStatus.getUser() == null) {
+                Toast.makeText(this,
+                        "You must login to reserve a slot.", Toast.LENGTH_SHORT)
+                        .show();
+                // TODO: Send to LoginActivity
+                return;
+            }
+
+            Intent intent = new Intent(this,
+                    ReserveSlotActivity.class);
+            intent.putExtra(EXTRA_MACHINE_ID, machineId);
+            intent.putExtra(EXTRA_CLICKED_MILLIS, calendar.getTimeInMillis());
+            startActivity(intent);
         });
     }
 
