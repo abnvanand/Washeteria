@@ -1,62 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context=".ui.events.ReserveSlotActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Machine" />
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/view_toolbar" />
 
-    <TextView
-        android:id="@+id/machineName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="OBH1" />
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Starts At" />
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/startsAtDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="date" />
 
-    <EditText
-        android:id="@+id/startsAtTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="time" />
+        <LinearLayout
+            android:layout_marginTop="100dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ends At" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Machine"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-    <EditText
-        android:id="@+id/endsAtDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="date" />
+            <TextView
+                android:id="@+id/machineName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorPrimaryDark"
+                tools:text="OBH1" />
+        </LinearLayout>
 
-    <EditText
-        android:id="@+id/endsAtTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="time" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Starts At"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-    <Button
-        android:id="@+id/btnReserveSlot"
-        android:enabled="false"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Reserve Slot" />
+        <LinearLayout
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
+
+
+            <EditText
+                android:id="@+id/startsAtDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false" />
+
+            <ImageButton
+                android:id="@+id/btnEditStartsAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_black_24dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ends At"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
+
+
+            <EditText
+                android:id="@+id/endsAtDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:id="@+id/btnEditEndsAt"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_black_24dp" />
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/btnReserveSlot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:enabled="false"
+            android:text="Reserve Slot" />
+
+    </LinearLayout>
 
 </LinearLayout>
