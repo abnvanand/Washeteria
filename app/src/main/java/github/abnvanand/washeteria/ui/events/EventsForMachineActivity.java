@@ -150,10 +150,6 @@ public class EventsForMachineActivity extends AppCompatActivity {
             Event event = events.get(i);
             Calendar eventStartCal = DateConverters.getCalendarFromString(event.getStartsAt());
             Calendar eventEndCal = DateConverters.getCalendarFromString(event.getEndsAt());
-            Timber.d("Adding event%s\nfrom %s to %s",
-                    event.getId(),
-                    eventStartCal.getTime(),
-                    eventEndCal.getTime());
 
             BookingEvent bookingEvent = new
                     BookingEvent(
