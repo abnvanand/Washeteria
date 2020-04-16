@@ -10,6 +10,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,10 +44,8 @@ public class CancelReservationActivity extends AppCompatActivity {
         String eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
         TextView machineNameTV = findViewById(R.id.machineName);
-        EditText startsAtDate = findViewById(R.id.startsAtDate);
-        EditText startsAtTime = findViewById(R.id.startsAtTime);
-        EditText endsAtDate = findViewById(R.id.endsAtDate);
-        EditText endsAtTime = findViewById(R.id.endsAtTime);
+        EditText startsAtEditText = findViewById(R.id.startsAtDate);
+        EditText endsAtEditText = findViewById(R.id.endsAtDate);
         Button btnCancelEvent = findViewById(R.id.btnCancelEvent);
 
         executor.execute(new Runnable() {
@@ -71,7 +72,10 @@ public class CancelReservationActivity extends AppCompatActivity {
                 mdb.locationDao().getLocationById(locationId);
 
                 machineNameTV.setText(machineById.getName());
-                machineNameTV.setText(machineById.getName());
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault());
+                startsAtEditText.setText(dateFormat.format(new Date(eventToCancel.getStartsAtMillis())));
+                endsAtEditText.setText(dateFormat.format(new Date(eventToCancel.getEndsAtMillis())));
             }
         });
 
@@ -105,11 +109,13 @@ public class CancelReservationActivity extends AppCompatActivity {
 
                                     setResult(RESULT_CANCELED);
                                     finish();
+                                    return;
                                 }
 
                                 Event body = response.body();
                                 if (body == null) {
                                     Timber.wtf("events cancel API response body MUST NOT be empty");
+                                    return;
                                 }
 
                                 Toast.makeText(CancelReservationActivity.this,
