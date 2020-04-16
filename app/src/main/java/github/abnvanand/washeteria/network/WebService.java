@@ -14,24 +14,28 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
+
 
 public interface WebService {
-    @POST("/getToken")
+    @POST("getToken")
     Call<LoggedInUser> login(@Body LoginRequestBody loginRequestBody);
 
-    @GET("/locations")
+    @GET("locations")
     Call<List<Location>> getLocations();
 
-    @GET("/locations/{locationId}/machines")
+    @GET("machines/location/{locationId}")
     Call<List<Machine>> getMachines(@Path("locationId") String locationId);
 
-    @GET("/events")
-    Call<List<Event>> getEvents(@Query("modifiedAfter") Long modifiedAfter);
+    @GET("events")
+    Call<List<Event>> getEvents();
 
-    @PUT("/events")
+    @POST("events")
+    Call<Event> createEvent(@Body EventCreateBody eventToCreate);
+
+    @PUT("events")
     Call<Event> cancelEvent(@Body Event eventToCancel);
 
-    @POST("/events")
-    Call<Event> createEvent(@Body EventCreateBody eventToCreate);
+    @GET("events/modified/{modifiedAfter}")
+    Call<List<Event>> getEventsAfter(@Path("modifiedAfter") String modifiedAtfer);
+//    Call<List<Event>> getEventsAfter(@Query("modifiedAfter") Long modifiedAfter);
 }

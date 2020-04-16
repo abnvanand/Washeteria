@@ -178,7 +178,7 @@ public class AppRepository {
                 // TODO: Try to get lastModifiedAt from local db so that we fetch only newer events
                 Long lastModifiedAt = null;
 //                long lastModifiedAt = mDb.eventDao().getLastModifiedAt();
-                webService.getEvents(lastModifiedAt)
+                webService.getEvents()
                         .enqueue(new Callback<List<Event>>() {
                             @Override
                             public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
@@ -260,7 +260,7 @@ public class AppRepository {
                 // TODO: Try to get lastModifiedAt from local db so that we fetch only newer events
                 Long lastModifiedAt = null;
 //                long lastModifiedAt = mDb.eventDao().getLastModifiedAt();
-                webService.getEvents(lastModifiedAt)
+                webService.getEvents()
                         .enqueue(new Callback<List<Event>>() {
                             @Override
                             public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
