@@ -23,7 +23,7 @@ public class Machine {
     @SerializedName("status")
     private String status;  // Vacant / Occupied / Malfunctioned
 
-    @SerializedName("remainingTime")
+    @SerializedName("nextAvailableAt")
     private String remainingTime; // Set if status == Occupied
     // TODO: Add a list of events of this machine
 
