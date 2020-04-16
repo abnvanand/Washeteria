@@ -108,7 +108,18 @@ public class ReserveSlotActivity extends AppCompatActivity {
                                     setResult(RESULT_CANCELED);
                                     finish();
                                 }
-//                                Event body = response.body();
+                                Event body = response.body();
+
+                                if (body == null) {
+                                    Timber.wtf("event create API response body MUST NOT be empty");
+                                    return;
+                                }
+
+                                Toast.makeText(ReserveSlotActivity.this,
+                                        "Created event: " + body.getId(),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+
                                 setResult(RESULT_OK);
                                 finish();
                             }
