@@ -168,7 +168,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
             BookingEvent bookingEvent = new
                     BookingEvent(
-                    i,
+                    event.getNumericId(),
                     eventStartCal,
                     eventEndCal,
                     event.isCancelled(),

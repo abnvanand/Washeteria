@@ -3,11 +3,13 @@ package github.abnvanand.washeteria.models;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
-@Entity(tableName = "events", primaryKeys = {"id"})
+@Entity(tableName = "events")
 public class Event {
+    @PrimaryKey
     @SerializedName("eventId")
     @NonNull
     private String id;
@@ -131,5 +133,9 @@ public class Event {
 
     public long getStartsAtMillis() {
         return getStartsAt() * 1000;
+    }
+
+    public long getNumericId() {
+        return Long.parseLong(getId());
     }
 }
