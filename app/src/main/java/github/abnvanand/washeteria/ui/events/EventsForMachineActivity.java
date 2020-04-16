@@ -32,6 +32,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
     public static final String EXTRA_CLICKED_MILLIS = "calendar_object";
     public static final String EXTRA_EVENT_ID = "clicked_event_id";
     public static final int REQUEST_EVENT_CREATION_STATUS = 1003;
+    public static final int REQUEST_EVENT_CANCEL_STATUS = 1004;
     private LoggedInStatus mLoggedInStatus;
 
     private WeekView<BookingEvent> weekView;
@@ -104,7 +105,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, CancelReservationActivity.class);
             intent.putExtra(EXTRA_EVENT_ID, String.valueOf(bookingEvent.getId())); // event object which contains event id
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_EVENT_CANCEL_STATUS);
 
         });
 
@@ -136,9 +137,11 @@ public class EventsForMachineActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_EVENT_CREATION_STATUS) {
-            if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_EVENT_CREATION_STATUS) {
                 // Refresh  events
+                mViewModel.getDataByMachine(machineId);
+            } else if (requestCode == REQUEST_EVENT_CANCEL_STATUS) {
                 mViewModel.getDataByMachine(machineId);
             }
         }

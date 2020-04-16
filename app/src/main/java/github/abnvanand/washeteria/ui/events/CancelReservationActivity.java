@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,6 +20,9 @@ import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import timber.log.Timber;
 
@@ -50,7 +54,7 @@ public class CancelReservationActivity extends AppCompatActivity {
 
                 eventToCancel = mdb.eventDao().getEventById(eventId);
                 if (eventToCancel == null)
-                    Timber.wtf("eventToCancel %s does not exist", eventToCancel);
+                    Timber.wtf("eventToCancel for id %s does not exist", eventId);
                 else
                     Timber.d("eventToCancel %s", eventToCancel);
 
@@ -59,10 +63,12 @@ public class CancelReservationActivity extends AppCompatActivity {
                 String creator = eventToCancel.getCreator();
                 Long startsAt = eventToCancel.getStartsAt();
                 Long endsAt = eventToCancel.getEndsAt();
-                Machine machineById = mdb.machineDao().getMachineById(machineId);
-                mdb.locationDao().getLocationById(locationId);
                 SessionManager sessionManager = new SessionManager(CancelReservationActivity.this);
                 token = sessionManager.getToken();
+
+
+                Machine machineById = mdb.machineDao().getMachineById(machineId);
+                mdb.locationDao().getLocationById(locationId);
 
                 machineNameTV.setText(machineById.getName());
                 machineNameTV.setText(machineById.getName());
@@ -82,9 +88,47 @@ public class CancelReservationActivity extends AppCompatActivity {
                     Timber.wtf("EventToCancel can't be null");
                 }
 
+                eventToCancel.setCancelled(true);
+
+
                 Retrofit authorizedInstance = RetrofitSingleton.getAuthorizedInstance(token);
                 WebService webService = authorizedInstance.create(WebService.class);
-                webService.cancelEvent(eventToCancel);
+                webService.cancelEvent(eventToCancel)
+                        .enqueue(new Callback<Event>() {
+                            @Override
+                            public void onResponse(Call<Event> call, Response<Event> response) {
+                                if (!response.isSuccessful()) {
+                                    Toast.makeText(CancelReservationActivity.this,
+                                            "Error: " + response.message(),
+                                            Toast.LENGTH_SHORT)
+                                            .show();
+
+                                    setResult(RESULT_CANCELED);
+                                    finish();
+                                }
+
+                                Event body = response.body();
+                                if (body == null) {
+                                    Timber.wtf("events cancel API response body MUST NOT be empty");
+                                }
+
+                                Toast.makeText(CancelReservationActivity.this,
+                                        "Cancelled event: " + body.getId(),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+
+                                setResult(RESULT_OK);
+                                finish();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Event> call, Throwable t) {
+                                Toast.makeText(CancelReservationActivity.this,
+                                        "Error: " + t.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
             }
         });
     }
