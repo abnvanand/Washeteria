@@ -36,6 +36,7 @@ public class ReserveSlotActivity extends AppCompatActivity {
     Executor executor = Executors.newSingleThreadExecutor();
     EventCreateBody eventCreateBody;
     String token;
+    String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,11 @@ public class ReserveSlotActivity extends AppCompatActivity {
         endsAt.add(Calendar.MINUTE, SLOT_MAX_LIMIT_MINUTES);
 
         executor.execute(() -> {
+            SessionManager sessionManager = new SessionManager(this);
+            token = sessionManager.getToken();
+            username = sessionManager.getUsername();
+
+
             AppDatabase mdb = AppDatabase.getInstance(ReserveSlotActivity.this);
             Machine machine = mdb.machineDao().getMachineById(machineId);
 
@@ -71,10 +77,9 @@ public class ReserveSlotActivity extends AppCompatActivity {
                     machine.getLocationId(),
                     startsAt.getTimeInMillis(),
                     endsAt.getTimeInMillis(),
-                    false);
-
-            SessionManager sessionManager = new SessionManager(this);
-            token = sessionManager.getToken();
+                    false,
+                    username
+            );
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -99,7 +104,13 @@ public class ReserveSlotActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(Call<Event> call, Response<Event> response) {
                                 Toast.makeText(ReserveSlotActivity.this, "OnResponse", Toast.LENGTH_SHORT).show();
-
+                                if (!response.isSuccessful()) {
+                                    setResult(RESULT_CANCELED);
+                                    finish();
+                                }
+//                                Event body = response.body();
+                                setResult(RESULT_OK);
+                                finish();
                             }
 
                             @Override

@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,7 +22,6 @@ import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
-import github.abnvanand.washeteria.utils.DateConverters;
 import timber.log.Timber;
 
 import static github.abnvanand.washeteria.ui.dashboard.MainActivity.EXTRA_SELECTED_MACHINE_ID;
@@ -31,6 +31,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
     public static final String EXTRA_MACHINE_ID = "machine_id";
     public static final String EXTRA_CLICKED_MILLIS = "calendar_object";
     public static final String EXTRA_EVENT_ID = "clicked_event_id";
+    public static final int REQUEST_EVENT_CREATION_STATUS = 1003;
     private LoggedInStatus mLoggedInStatus;
 
     private WeekView<BookingEvent> weekView;
@@ -128,8 +129,19 @@ public class EventsForMachineActivity extends AppCompatActivity {
                     ReserveSlotActivity.class);
             intent.putExtra(EXTRA_MACHINE_ID, machineId);
             intent.putExtra(EXTRA_CLICKED_MILLIS, calendar.getTimeInMillis());
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_EVENT_CREATION_STATUS);
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EVENT_CREATION_STATUS) {
+            if (resultCode == RESULT_OK) {
+                // Refresh  events
+                mViewModel.getDataByMachine(machineId);
+            }
+        }
     }
 
     private void limitWeekViewRange() {
@@ -148,8 +160,11 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
-            Calendar eventStartCal = DateConverters.getCalendarFromString(event.getStartsAt());
-            Calendar eventEndCal = DateConverters.getCalendarFromString(event.getEndsAt());
+
+            Calendar eventStartCal = Calendar.getInstance();
+            eventStartCal.setTimeInMillis(event.getStartsAtMillis());
+            Calendar eventEndCal = Calendar.getInstance();
+            eventEndCal.setTimeInMillis(event.getEndsAtMillis());
 
             BookingEvent bookingEvent = new
                     BookingEvent(

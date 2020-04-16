@@ -91,8 +91,11 @@ public class ViewSlotsActivity extends AppCompatActivity {
 
         for (int i = 0; i < events.size(); i++) {
             Event event = events.get(i);
-            Calendar eventStartCal = DateConverters.getCalendarFromString(event.getStartsAt());
-            Calendar eventEndCal = DateConverters.getCalendarFromString(event.getEndsAt());
+            Calendar eventStartCal = Calendar.getInstance();
+            eventStartCal.setTimeInMillis(event.getStartsAtMillis());
+            Calendar eventEndCal =Calendar.getInstance();
+            eventEndCal.setTimeInMillis(event.getEndsAtMillis());
+
 
             BookingEvent bookingEvent = new
                     BookingEvent(

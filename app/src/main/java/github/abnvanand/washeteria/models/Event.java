@@ -8,16 +8,16 @@ import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "events", primaryKeys = {"id"})
 public class Event {
-    @SerializedName("id")
+    @SerializedName("eventId")
     @NonNull
     private String id;
 
     @SerializedName("startsAt")
-    private String startsAt;
+    private Long startsAt;
     @SerializedName("endsAt")
-    private String endsAt;
+    private Long endsAt;
     @SerializedName("modifiedAt")
-    private String modifiedAt;
+    private Long modifiedAt;
 
     @SerializedName("cancelled")
     private boolean cancelled;
@@ -27,7 +27,7 @@ public class Event {
     @SerializedName("locationId")
     private String locationId;
 
-    @SerializedName("creator")
+    @SerializedName("userId")
     private String creator;
 
     @Ignore
@@ -35,7 +35,7 @@ public class Event {
         this.id = id;
     }
 
-    public Event(@NonNull String id, String startsAt, String endsAt, String modifiedAt, boolean cancelled, String machineId, String locationId, String creator) {
+    public Event(@NonNull String id, Long startsAt, Long endsAt, Long modifiedAt, boolean cancelled, String machineId, String locationId, String creator) {
         this.id = id;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
@@ -63,27 +63,27 @@ public class Event {
         this.cancelled = cancelled;
     }
 
-    public String getStartsAt() {
+    public Long getStartsAt() {
         return startsAt;
     }
 
-    public void setStartsAt(String startsAt) {
+    public void setStartsAt(Long startsAt) {
         this.startsAt = startsAt;
     }
 
-    public String getEndsAt() {
+    public Long getEndsAt() {
         return endsAt;
     }
 
-    public void setEndsAt(String endsAt) {
+    public void setEndsAt(Long endsAt) {
         this.endsAt = endsAt;
     }
 
-    public String getModifiedAt() {
+    public Long getModifiedAt() {
         return modifiedAt;
     }
 
-    public void setModifiedAt(String modifiedAt) {
+    public void setModifiedAt(Long modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
 
@@ -123,5 +123,13 @@ public class Event {
                 ", locationId='" + locationId + '\'' +
                 ", creator='" + creator + '\'' +
                 '}';
+    }
+
+    public long getEndsAtMillis() {
+        return getEndsAt() * 1000;
+    }
+
+    public long getStartsAtMillis() {
+        return getStartsAt() * 1000;
     }
 }

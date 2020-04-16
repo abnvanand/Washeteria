@@ -49,11 +49,16 @@ public class CancelReservationActivity extends AppCompatActivity {
                 AppDatabase mdb = AppDatabase.getInstance(CancelReservationActivity.this);
 
                 eventToCancel = mdb.eventDao().getEventById(eventId);
+                if (eventToCancel == null)
+                    Timber.wtf("eventToCancel %s does not exist", eventToCancel);
+                else
+                    Timber.d("eventToCancel %s", eventToCancel);
+
                 String machineId = eventToCancel.getMachineId();
                 String locationId = eventToCancel.getLocationId();
                 String creator = eventToCancel.getCreator();
-                String startsAt = eventToCancel.getStartsAt();
-                String endsAt = eventToCancel.getEndsAt();
+                Long startsAt = eventToCancel.getStartsAt();
+                Long endsAt = eventToCancel.getEndsAt();
                 Machine machineById = mdb.machineDao().getMachineById(machineId);
                 mdb.locationDao().getLocationById(locationId);
                 SessionManager sessionManager = new SessionManager(CancelReservationActivity.this);
