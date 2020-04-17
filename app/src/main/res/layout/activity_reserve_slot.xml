@@ -8,7 +8,6 @@
     tools:context=".ui.events.ReserveSlotActivity">
 
     <include
-        android:id="@+id/toolbar"
         layout="@layout/view_toolbar" />
 
 
