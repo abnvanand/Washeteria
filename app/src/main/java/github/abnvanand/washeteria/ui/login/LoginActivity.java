@@ -15,6 +15,8 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.textfield.TextInputEditText;
+
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
@@ -29,7 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
 
     private View logoutForm;
-    private TextView textViewUsername, textViewToken, textViewExpiresAt;
+    private TextView textViewUsername;
+    TextInputEditText tokenEditText, expiresAtEditText;
     private Button logoutButton;
 
     @Override
@@ -44,8 +47,8 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.login);
         loadingProgressBar = findViewById(R.id.loading);
         textViewUsername = findViewById(R.id.textViewUsername);
-        textViewToken = findViewById(R.id.textViewToken);
-        textViewExpiresAt = findViewById(R.id.textViewExpiresAt);
+        tokenEditText = findViewById(R.id.token);
+        expiresAtEditText = findViewById(R.id.expiresAt);
         logoutButton = findViewById(R.id.btnLogout);
 
         setupUIListeners();
@@ -59,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
 //                        return;
 //                    }
 //                    Timber.d("Here3");
-//                    loadingProgressBar.setVisibility(View.GONE);
+//                    loadingProgressBar.setVisibility(View.INVISIBLE);
 //
 //                    if (loginResult.getError() != null) {
 //                        Timber.d("Here4");
@@ -106,7 +109,7 @@ public class LoginActivity extends AppCompatActivity {
                         return;
 
                     if (loggedInStatus.getError() != null) {
-                        loadingProgressBar.setVisibility(View.GONE);
+                        loadingProgressBar.setVisibility(View.INVISIBLE);
                         Toast.makeText(this,
                                 loggedInStatus.getError().getLocalizedMessage(),
                                 Toast.LENGTH_SHORT)
@@ -123,21 +126,21 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUIAfterLogout() {
-        loadingProgressBar.setVisibility(View.GONE);
+        loadingProgressBar.setVisibility(View.INVISIBLE);
         textViewUsername.setText("");
-        textViewToken.setText("");
-        textViewExpiresAt.setText("");
+        tokenEditText.setText("");
+        expiresAtEditText.setText("");
         logoutForm.setVisibility(View.INVISIBLE);
         loginForm.setVisibility(View.VISIBLE);
     }
 
     private void updateUIAfterLogin(LoggedInUser user) {
-        loadingProgressBar.setVisibility(View.GONE);
+        loadingProgressBar.setVisibility(View.INVISIBLE);
         loginForm.setVisibility(View.INVISIBLE);
         logoutForm.setVisibility(View.VISIBLE);
         textViewUsername.setText(user.getUsername());
-        textViewToken.setText(user.getToken());
-        textViewExpiresAt.setText(user.getExpiresAt());
+        tokenEditText.setText(user.getToken());
+        expiresAtEditText.setText(user.getExpiresAt());
     }
 
 
@@ -182,8 +185,8 @@ public class LoginActivity extends AppCompatActivity {
     private void updateLogoutPageWithLoggedInUser() {
         SessionManager manager = new SessionManager(getApplication());
         textViewUsername.setText(manager.getUsername());
-        textViewToken.setText(manager.getToken());
-        textViewExpiresAt.setText(manager.getExpiresAt());
+        tokenEditText.setText(manager.getToken());
+        expiresAtEditText.setText(manager.getExpiresAt());
     }
 
 

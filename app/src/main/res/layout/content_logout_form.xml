@@ -1,77 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="100dp"
-    android:orientation="vertical">
+    android:layout_margin="@dimen/activity_vertical_margin"
+    tools:showIn="@layout/activity_login">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_above="@id/textViewUsername"
         android:layout_margin="@dimen/activity_vertical_margin"
-        android:gravity="center_horizontal"
-        android:text="Hi"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:fontFamily="sans-serif-condensed-light"
+        android:gravity="center"
+        android:text="You are logged in as"
+        android:textSize="25sp" />
 
     <TextView
         android:id="@+id/textViewUsername"
-        android:layout_width="wrap_content"
-
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@id/tokenInputLayout"
         android:layout_margin="@dimen/activity_vertical_margin"
+        android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/colorPrimaryDark"
         tools:text="abhinav.anand@students.iiit.ac.in" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
 
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_vertical_margin">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Token: "
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <TextView
-            android:id="@+id/textViewToken"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            tools:text="fn4iuwef982rfc892u3jqd" />
-    </LinearLayout>
-
-    <LinearLayout
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tokenInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:layout_above="@id/expiresAtInputLayout"
         android:layout_margin="@dimen/activity_vertical_margin">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Expires At: "
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/token"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:hint="Token"
+            android:longClickable="false"
+            android:textAllCaps="true"
+            tools:text="84rnf8u923fnas" />
 
-        <TextView
-            android:id="@+id/textViewExpiresAt"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            tools:text="2020-10-23T10:00:00" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/expiresAtInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/activity_vertical_margin">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expiresAt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:hint="Expires At"
+            android:inputType="datetime"
+            android:longClickable="false"
+            tools:text="2020-19-10" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/expiresAtInputLayout"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/loading"
+        android:layout_gravity="start"
         android:layout_margin="@dimen/activity_vertical_margin"
+        android:enabled="true"
         android:text="@string/action_logout" />
 
-</LinearLayout>
+</RelativeLayout>
+
+    <!--<?xml version="1.0" encoding="utf-8"?>-->
+    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent"-->
+    <!--    android:layout_gravity="center_horizontal"-->
+    <!--    android:layout_marginTop="100dp"-->
+    <!--    android:orientation="vertical">-->
+
+    <!--    <TextView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="center_horizontal"-->
+    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:text="Hi"-->
+    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Large" />-->
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/textViewUsername"-->
+    <!--        android:layout_width="wrap_content"-->
+
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
+    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Large"-->
+    <!--        android:textColor="@color/colorPrimaryDark"-->
+    <!--        tools:text="abhinav.anand@students.iiit.ac.in" />-->
+
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_margin="@dimen/activity_vertical_margin">-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:text="Token: "-->
+    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />-->
+
+    <!--        <TextView-->
+    <!--            android:id="@+id/textViewToken"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
+    <!--            tools:text="fn4iuwef982rfc892u3jqd" />-->
+    <!--    </LinearLayout>-->
+
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+
+    <!--        android:layout_margin="@dimen/activity_vertical_margin">-->
+
+    <!--        <TextView-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:text="Expires At: "-->
+    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />-->
+
+    <!--        <TextView-->
+    <!--            android:id="@+id/textViewExpiresAt"-->
+    <!--            android:layout_width="wrap_content"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
+    <!--            tools:text="2020-10-23T10:00:00" />-->
+
+    <!--    </LinearLayout>-->
+
+    <!--    <Button-->
+    <!--        android:id="@+id/btnLogout"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
+    <!--        android:text="@string/action_logout" />-->
+
+    <!--</LinearLayout>-->

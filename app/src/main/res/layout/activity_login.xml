@@ -4,20 +4,20 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".ui.login.LoginActivity">
+
+    <include layout="@layout/view_toolbar" />
 
     <include
         android:id="@+id/loginForm"
         layout="@layout/content_login_form"
-        android:visibility="visible" />
+        android:visibility="visible"
+        tools:visibility="invisible" />
 
     <include
         android:id="@+id/logoutForm"
         layout="@layout/content_logout_form"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        tools:visibility="visible" />
 
 </RelativeLayout>
