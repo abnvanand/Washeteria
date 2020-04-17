@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -16,12 +17,15 @@ import com.alamkanak.weekview.WeekViewDisplayable;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
+import github.abnvanand.washeteria.utils.WeekViewType;
 import timber.log.Timber;
 
 import static github.abnvanand.washeteria.ui.dashboard.MainActivity.EXTRA_SELECTED_MACHINE_ID;
@@ -37,16 +41,17 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
     private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
-    private LoginViewModel loginViewModel;
 
-    ArrayList<Integer> eventColors = new ArrayList<>();
+    private ArrayList<Integer> eventColors = new ArrayList<>();
+    private Map<Integer, String> bookingIdToEventIdMapping = new HashMap<>();
+
     String machineId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
@@ -66,7 +71,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
     }
 
     private void initViewModel(String machineId) {
-        loginViewModel = new ViewModelProvider(this)
+        LoginViewModel loginViewModel = new ViewModelProvider(this)
                 .get(LoginViewModel.class);
 
         loginViewModel.getLoggedInStatusObservable()
@@ -104,7 +109,8 @@ public class EventsForMachineActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(this, CancelReservationActivity.class);
-            intent.putExtra(EXTRA_EVENT_ID, String.valueOf(bookingEvent.getId())); // event object which contains event id
+            String eventId = bookingIdToEventIdMapping.get(bookingEvent.getId());
+            intent.putExtra(EXTRA_EVENT_ID, eventId); // event object which contains event id
             startActivityForResult(intent, REQUEST_EVENT_CANCEL_STATUS);
 
         });
@@ -171,7 +177,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
             BookingEvent bookingEvent = new
                     BookingEvent(
-                    event.getNumericId(),
+                    i,
                     eventStartCal,
                     eventEndCal,
                     event.isCancelled(),
@@ -182,10 +188,10 @@ public class EventsForMachineActivity extends AppCompatActivity {
                     event.getCreator(),
                     eventColors.get(i % eventColors.size())
             );
+            bookingIdToEventIdMapping.put(i, event.getId());
             weekViewDisplayableList.add(bookingEvent);
         }
 
-        // FIXME: gives NPE when a machine has no events
         weekView.submit(weekViewDisplayableList);
     }
 
@@ -206,32 +212,12 @@ public class EventsForMachineActivity extends AppCompatActivity {
         if (id == R.id.action_today) {
             weekView.goToToday();
             return true;
-        } else {
-            if (currentViewTypeId() != item.getItemId()) {
+        } else{
+            if (id != WeekViewType.getAction(weekView.getNumberOfVisibleDays())) {
                 item.setChecked(!item.isChecked());
-                weekView.setNumberOfVisibleDays(getSelectedItemNumberOfVisibleDays(item));
+                weekView.setNumberOfVisibleDays(WeekViewType.getNumVisibleDays(item.getItemId()));
             }
             return true;
         }
-    }
-
-    // TODO: refactor logic into Enums
-    private int getSelectedItemNumberOfVisibleDays(MenuItem item) {
-        if (item.getItemId() == R.id.action_day_view)
-            return 1;
-        else if (item.getItemId() == R.id.action_three_day_view)
-            return 3;
-        else
-            return 7;
-    }
-
-    private int currentViewTypeId() {
-        int numberOfVisibleDays = weekView.getNumberOfVisibleDays();
-        if (numberOfVisibleDays == 1)
-            return R.id.action_day_view;
-        else if (numberOfVisibleDays == 3)
-            return R.id.action_three_day_view;
-        else
-            return R.id.action_week_view;
     }
 }
