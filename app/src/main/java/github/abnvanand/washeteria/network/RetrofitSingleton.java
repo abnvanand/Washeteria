@@ -21,6 +21,9 @@ public class RetrofitSingleton {
             // Add auth interceptor if token exists
             addAuthInterceptor(token, httpClient);
 
+            // Add http 401 response interceptor
+            addUnauthorizedResponseInterceptor(httpClient);
+
             // Add logging as last interceptor
             addLogginInterceptor(httpClient);
 
@@ -56,6 +59,13 @@ public class RetrofitSingleton {
                                            OkHttpClient.Builder httpClient) {
         httpClient.addInterceptor(new AuthInterceptor(token));
     }
+
+
+    private static void addUnauthorizedResponseInterceptor(OkHttpClient.Builder httpClient) {
+        UnauthorizedResponseInterceptor interceptor = new UnauthorizedResponseInterceptor();
+        httpClient.addInterceptor(interceptor);
+    }
+
 
     private static void addLogginInterceptor(OkHttpClient.Builder httpClient) {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
