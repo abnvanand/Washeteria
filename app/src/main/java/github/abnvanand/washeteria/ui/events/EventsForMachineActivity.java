@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -14,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewDisplayable;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,6 +27,7 @@ import java.util.Map;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
+import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.WeekViewType;
 import timber.log.Timber;
@@ -38,13 +42,13 @@ public class EventsForMachineActivity extends AppCompatActivity {
     public static final int REQUEST_EVENT_CREATION_STATUS = 1003;
     public static final int REQUEST_EVENT_CANCEL_STATUS = 1004;
     private LoggedInStatus mLoggedInStatus;
-
+    private Snackbar loginSnackbar;
     private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
 
     private ArrayList<Integer> eventColors = new ArrayList<>();
     private Map<Integer, String> bookingIdToEventIdMapping = new HashMap<>();
-
+    private LinearLayout rootLayout;
     String machineId;
 
     @Override
@@ -53,6 +57,19 @@ public class EventsForMachineActivity extends AppCompatActivity {
         setContentView(R.layout.activity_events);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        rootLayout = findViewById(R.id.rootLayout);
+
+        // TODO: Add action to go to login screen
+        loginSnackbar = Snackbar
+                .make(rootLayout, "You must login to perform this action.", Snackbar.LENGTH_LONG)
+                .setAction("LOGIN", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(EventsForMachineActivity.this, LoginActivity.class));
+
+                    }
+                });
 
         machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
 
@@ -93,18 +110,21 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
     private void setupListeners() {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
-            Toast.makeText(EventsForMachineActivity.this,
-                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_SHORT)
-                    .show();
             String creator = bookingEvent.getCreator();
 
-
-            // Open cancel Activity only if currently logged in user is the creator of this event
             if (mLoggedInStatus == null
                     || !mLoggedInStatus.isLoggedIn()
-                    || mLoggedInStatus.getUser() == null
-                    || !creator.equals(mLoggedInStatus.getUser().getUsername())) {
-                Toast.makeText(this, "Only owner can edit a reservation", Toast.LENGTH_SHORT).show();
+                    || mLoggedInStatus.getUser() == null) {
+                loginSnackbar.setText("Please login to edit a reservation.")
+                        .show();
+                return;
+            }
+
+            // Open cancel Activity only if currently logged in user is the creator of this event
+            if (!creator.equals(mLoggedInStatus.getUser().getUsername())) {
+                Toast.makeText(this,
+                        "Only owner can edit a reservation",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -117,18 +137,13 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
-            Toast.makeText(EventsForMachineActivity.this,
-                    "Book this slot: " + calendar.getTime(),
-                    Toast.LENGTH_SHORT).show();
-
             // TODO: make sure
             if (mLoggedInStatus == null
                     || !mLoggedInStatus.isLoggedIn()
                     || mLoggedInStatus.getUser() == null) {
-                Toast.makeText(this,
-                        "You must login to reserve a slot.", Toast.LENGTH_SHORT)
+                loginSnackbar
+                        .setText("You must be logged in to reserve a slot.")
                         .show();
-                // TODO: Send to LoginActivity
                 return;
             }
 
@@ -212,7 +227,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
         if (id == R.id.action_today) {
             weekView.goToToday();
             return true;
-        } else{
+        } else {
             if (id != WeekViewType.getAction(weekView.getNumberOfVisibleDays())) {
                 item.setChecked(!item.isChecked());
                 weekView.setNumberOfVisibleDays(WeekViewType.getNumVisibleDays(item.getItemId()));
