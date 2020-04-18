@@ -121,6 +121,7 @@
     <string name="action_week_view">Week view</string>
     <string name="text_fake_username">abhinav.anand@students.iiit.ac.in</string>
     <string name="text_fake_password">123</string>
+    <string name="text_fake_token">fw89ujn348u935v38v4378vtjh8vhig89v43f384miocfkjef59tve</string>
     <string name="text_logout_header">You are logged in as</string>
     <string name="text_login_header">Please use you IIIT H credentials</string>
     <string name="hint_token">Token</string>

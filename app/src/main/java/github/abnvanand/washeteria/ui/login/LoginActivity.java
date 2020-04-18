@@ -20,6 +20,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
+import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -110,8 +111,10 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (loggedInStatus.getError() != null) {
                         loadingProgressBar.setVisibility(View.INVISIBLE);
+//                        Timber.d(loggedInStatus.getError(), "LoggedinStatusError");
+                        Timber.d("LoggedinStatusError getMessage: %s", loggedInStatus.getError().getMesssage());
                         Toast.makeText(this,
-                                loggedInStatus.getError().getLocalizedMessage(),
+                                loggedInStatus.getError().getMesssage(),
                                 Toast.LENGTH_SHORT)
                                 .show();
                         return;

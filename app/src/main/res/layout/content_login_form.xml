@@ -33,7 +33,7 @@
             android:hint="@string/prompt_email"
             android:inputType="textEmailAddress"
             android:selectAllOnFocus="true"
-            tools:text="@string/text_fake_username" />
+            android:text="@string/text_fake_username"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,7 +57,7 @@
             android:imeOptions="actionDone"
             android:inputType="textPassword"
             android:selectAllOnFocus="true"
-            tools:text="@string/text_fake_password" />
+            android:text="@string/text_fake_password" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
