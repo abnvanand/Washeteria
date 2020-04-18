@@ -13,7 +13,7 @@
         android:layout_margin="@dimen/activity_vertical_margin"
         android:fontFamily="sans-serif-condensed-light"
         android:gravity="center"
-        android:text="You are logged in as"
+        android:text="@string/text_logout_header"
         android:textSize="25sp" />
 
     <TextView
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             android:focusable="false"
-            android:hint="Token"
+            android:hint="@string/hint_token"
             android:longClickable="false"
             android:textAllCaps="true"
             tools:text="84rnf8u923fnas" />
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             android:focusable="false"
-            android:hint="Expires At"
+            android:hint="@string/hint_expires_at"
             android:inputType="datetime"
             android:longClickable="false"
             tools:text="2020-19-10" />
@@ -88,81 +88,3 @@
         android:text="@string/action_logout" />
 
 </RelativeLayout>
-
-    <!--<?xml version="1.0" encoding="utf-8"?>-->
-    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    xmlns:tools="http://schemas.android.com/tools"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="match_parent"-->
-    <!--    android:layout_gravity="center_horizontal"-->
-    <!--    android:layout_marginTop="100dp"-->
-    <!--    android:orientation="vertical">-->
-
-    <!--    <TextView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center_horizontal"-->
-    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
-    <!--        android:gravity="center_horizontal"-->
-    <!--        android:text="Hi"-->
-    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Large" />-->
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/textViewUsername"-->
-    <!--        android:layout_width="wrap_content"-->
-
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
-    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Large"-->
-    <!--        android:textColor="@color/colorPrimaryDark"-->
-    <!--        tools:text="abhinav.anand@students.iiit.ac.in" />-->
-
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_margin="@dimen/activity_vertical_margin">-->
-
-    <!--        <TextView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:text="Token: "-->
-    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />-->
-
-    <!--        <TextView-->
-    <!--            android:id="@+id/textViewToken"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
-    <!--            tools:text="fn4iuwef982rfc892u3jqd" />-->
-    <!--    </LinearLayout>-->
-
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-
-    <!--        android:layout_margin="@dimen/activity_vertical_margin">-->
-
-    <!--        <TextView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:text="Expires At: "-->
-    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />-->
-
-    <!--        <TextView-->
-    <!--            android:id="@+id/textViewExpiresAt"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
-    <!--            tools:text="2020-10-23T10:00:00" />-->
-
-    <!--    </LinearLayout>-->
-
-    <!--    <Button-->
-    <!--        android:id="@+id/btnLogout"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_margin="@dimen/activity_vertical_margin"-->
-    <!--        android:text="@string/action_logout" />-->
-
-    <!--</LinearLayout>-->

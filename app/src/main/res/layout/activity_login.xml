@@ -12,12 +12,12 @@
         android:id="@+id/loginForm"
         layout="@layout/content_login_form"
         android:visibility="visible"
-        tools:visibility="invisible" />
+        tools:visibility="visible" />
 
     <include
         android:id="@+id/logoutForm"
         layout="@layout/content_logout_form"
         android:visibility="invisible"
-        tools:visibility="visible" />
+        tools:visibility="invisible" />
 
 </RelativeLayout>

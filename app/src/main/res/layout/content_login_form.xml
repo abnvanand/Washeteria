@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,11 +14,12 @@
         android:layout_margin="@dimen/activity_vertical_margin"
         android:fontFamily="sans-serif-condensed-light"
         android:gravity="center"
-        android:text="Please use you IIIT H credentials"
+        android:text="@string/text_login_header"
         android:textSize="25sp" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/passwordInputLayout"
@@ -31,30 +33,31 @@
             android:hint="@string/prompt_email"
             android:inputType="textEmailAddress"
             android:selectAllOnFocus="true"
-            android:text="@string/text_fake_username" />
+            tools:text="@string/text_fake_username" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-
-        android:layout_margin="@dimen/activity_vertical_margin">
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:hint="@string/prompt_password"
+        app:endIconMode="password_toggle"
+        app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="@string/prompt_password"
-            android:hint="@string/prompt_password"
             android:imeActionLabel="@string/action_sign_in_short"
             android:imeOptions="actionDone"
-
             android:inputType="textPassword"
             android:selectAllOnFocus="true"
-            android:text="@string/text_fake_password" />
+            tools:text="@string/text_fake_password" />
     </com.google.android.material.textfield.TextInputLayout>
 
 

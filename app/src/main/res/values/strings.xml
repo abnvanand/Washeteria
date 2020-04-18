@@ -108,7 +108,7 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome "</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password">Password can\'t be empty</string>
     <string name="login_failed">"Login failed"</string>
     <string name="action_signin">Sign In</string>
     <string name="action_signout">Sign out</string>
@@ -121,4 +121,8 @@
     <string name="action_week_view">Week view</string>
     <string name="text_fake_username">abhinav.anand@students.iiit.ac.in</string>
     <string name="text_fake_password">123</string>
+    <string name="text_logout_header">You are logged in as</string>
+    <string name="text_login_header">Please use you IIIT H credentials</string>
+    <string name="hint_token">Token</string>
+    <string name="hint_expires_at">Expires At</string>
 </resources>
