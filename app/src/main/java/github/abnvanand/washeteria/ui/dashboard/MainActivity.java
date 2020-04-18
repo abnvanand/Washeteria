@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -59,10 +58,10 @@ public class MainActivity extends AppCompatActivity
         fab.setMenuListener(this);
 
         spinner = findViewById(R.id.locationSelector);
-        spinner.setOnItemSelectedListener(this);
-
         mRecyclerView = findViewById(R.id.recyclerView);
         pullToRefresh = findViewById(R.id.pullToRefresh);
+
+        spinner.setOnItemSelectedListener(this);
         pullToRefresh.setOnRefreshListener(this);
 
         initRecyclerView();
@@ -80,9 +79,9 @@ public class MainActivity extends AppCompatActivity
 
         ItemClickSupport.addTo(mRecyclerView)
                 .setOnItemClickListener((recyclerView, position, v) -> {
-                    Intent intent = new Intent(MainActivity.this,
-                            EventsForMachineActivity.class);
-                    intent.putExtra(EXTRA_SELECTED_MACHINE_ID, machineAdapter.getItem(position).getId());
+                    Intent intent = new Intent(MainActivity.this, EventsForMachineActivity.class);
+                    intent.putExtra(EXTRA_SELECTED_MACHINE_ID,
+                            machineAdapter.getItem(position).getId());
                     startActivity(intent);
                 });
     }
@@ -159,10 +158,6 @@ public class MainActivity extends AppCompatActivity
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // On selecting a spinner item
         currentLocation = (Location) parent.getItemAtPosition(position);
-
-        // Showing selected spinner item
-        Toast.makeText(parent.getContext(), "Selected: " + currentLocation.getName(), Toast.LENGTH_SHORT).show();
-
         mViewModel.getData(currentLocation.getId());
         pullToRefresh.setRefreshing(true);
     }
