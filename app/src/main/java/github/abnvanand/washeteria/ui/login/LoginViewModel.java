@@ -33,7 +33,7 @@ public class LoginViewModel extends AndroidViewModel {
 
         loggedInStatusObservable.addSource(mRepository.getLoggedInStatusObservable(),
                 loggedInStatus -> {
-            loggedInStatusObservable.setValue(loggedInStatus);
+                    loggedInStatusObservable.setValue(loggedInStatus);
                 });
 
 
@@ -107,6 +107,9 @@ public class LoginViewModel extends AndroidViewModel {
 
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
-        return password != null;
+        if (password == null)
+            return false;
+
+        return !password.trim().isEmpty();
     }
 }
