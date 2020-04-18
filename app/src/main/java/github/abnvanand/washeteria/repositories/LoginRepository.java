@@ -4,16 +4,18 @@ import android.content.Context;
 
 import androidx.lifecycle.MutableLiveData;
 
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull;
+
+import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import github.abnvanand.washeteria.models.LoggedInUser;
-import github.abnvanand.washeteria.models.pojo.LoginRequestBody;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
+import github.abnvanand.washeteria.ui.login.LoginResponseError;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,44 +55,44 @@ public class LoginRepository {
     }
 
     public void login(String username, String password) {
-        // handle login
-        LoginRequestBody requestBody = new LoginRequestBody(username, password);
-
         webService
-                .login(requestBody)
-                .enqueue(new Callback<LoggedInUser>() {
-                    @Override
-                    public void onResponse(Call<LoggedInUser> call, Response<LoggedInUser> response) {
-                        if (!response.isSuccessful()) {
-                            clearFromSharedPrefs();
+                .login(username, password).enqueue(new Callback<LoggedInUser>() {
+            @Override
+            public void onResponse(@NotNull Call<LoggedInUser> call,
+                                   @NotNull Response<LoggedInUser> response) {
+                if (!response.isSuccessful()) {
+                    clearFromSharedPrefs();
 
-                            loggedInStatusObservable
-                                    .postValue(new LoggedInStatus(false,
-                                            null,
-                                            new IOException(response.message())));
+                    String errorMessage = response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ? "Invalid username/password." : String.valueOf(response.code());
+                    loggedInStatusObservable
+                            .postValue(new LoggedInStatus(false,
+                                    null,
+                                    new LoginResponseError(String.valueOf(response.code()), errorMessage)));
 
-                            return;
-                        }
-                        LoggedInUser loggedInUser = response.body();
-                        if (loggedInUser != null) {
-                            addUserToSharedPrefs(loggedInUser);
+                    return;
+                }
+                LoggedInUser loggedInUser = response.body();
+                if (loggedInUser != null) {
+                    // API Does not return username so fill it here on success
+                    loggedInUser.setUsername(username);
+                    addUserToSharedPrefs(loggedInUser);
 
-                            // Reset retrofit instance
-                            RetrofitSingleton.reset();
-                        }
+                    // Reset retrofit instance
+                    RetrofitSingleton.reset();
+                }
 
 //                        loginResultObservable.postValue(new Result.Success<LoggedInUser>(response.body()));
-                    }
+            }
 
-                    @Override
-                    public void onFailure(Call<LoggedInUser> call, Throwable t) {
+            @Override
+            public void onFailure(Call<LoggedInUser> call, Throwable t) {
 //                        loginResultObservable.postValue(new Result.Error(new IOException(t.getLocalizedMessage())));
-                        clearFromSharedPrefs();
-                        loggedInStatusObservable.postValue(new LoggedInStatus(false,
-                                null,
-                                new IOException(t.getLocalizedMessage())));
-                    }
-                });
+                clearFromSharedPrefs();
+                loggedInStatusObservable.postValue(new LoggedInStatus(false,
+                        null,
+                        new LoginResponseError("N/W error", t.getLocalizedMessage())));
+            }
+        });
     }
 
     public void logout() {

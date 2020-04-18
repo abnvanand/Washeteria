@@ -13,12 +13,12 @@ public class LoggedInStatus {
     private LoggedInUser user;
 
     @Nullable
-    private Exception error;
+    private LoginResponseError error;
 
 
     public LoggedInStatus(@NonNull boolean isLoggedIn,
                           @Nullable LoggedInUser user,
-                          @Nullable Exception error) {
+                          @Nullable LoginResponseError error) {
         this.isLoggedIn = isLoggedIn;
         this.user = user;
         this.error = error;
@@ -33,7 +33,7 @@ public class LoggedInStatus {
     }
 
     @Nullable
-    public Exception getError() {
+    public LoginResponseError getError() {
         return error;
     }
 }
