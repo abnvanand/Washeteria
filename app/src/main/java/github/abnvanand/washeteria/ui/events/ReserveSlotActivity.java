@@ -1,10 +1,13 @@
 package github.abnvanand.washeteria.ui.events;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -12,7 +15,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +38,9 @@ import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
+import github.abnvanand.washeteria.ui.login.LoggedInStatus;
+import github.abnvanand.washeteria.ui.login.LoginActivity;
+import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,6 +51,7 @@ import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXT
 
 public class ReserveSlotActivity extends AppCompatActivity {
     private int SLOT_MAX_LIMIT_MINUTES = 50;
+    LoginViewModel loginViewModel;
 
     Executor executor = Executors.newSingleThreadExecutor();
     EventCreateBody eventCreateBody;
@@ -48,7 +61,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
     Calendar endsAt;
     EditText startsAtEditText;
     EditText endsAtEditText;
-
+    private LoggedInStatus mLoggedInStatus;
+    LinearLayout rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +70,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reserve_slot);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        rootView = findViewById(R.id.rootView);
 
         TextView machineNameTV = findViewById(R.id.machineName);
         startsAtEditText = findViewById(R.id.startsAtDate);
@@ -70,6 +86,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
 
         if (millis == -1)
             Timber.wtf("This is fucked up");
+
+        initViewModel();
 
 
         startsAt = Calendar.getInstance();
@@ -116,37 +134,57 @@ public class ReserveSlotActivity extends AppCompatActivity {
             public void onClick(View v) {
                 WebService webService = RetrofitSingleton.getAuthorizedInstance(token)
                         .create(WebService.class);
-                webService.createEvent(eventCreateBody)
-                        .enqueue(new Callback<Event>() {
-                            @Override
-                            public void onResponse(Call<Event> call, Response<Event> response) {
-                                Toast.makeText(ReserveSlotActivity.this, "OnResponse", Toast.LENGTH_SHORT).show();
-                                if (!response.isSuccessful()) {
-                                    setResult(RESULT_CANCELED);
-                                    finish();
-                                }
-                                Event body = response.body();
-
-                                if (body == null) {
-                                    Timber.wtf("event create API response body MUST NOT be empty");
-                                    return;
-                                }
-
+                webService.createEvent(eventCreateBody).enqueue(new Callback<Event>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
+                        if (!response.isSuccessful()) {
+                            if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                // TODO: Register with login viewmodel and call logout
+                                loginViewModel.logout();
+                                Snackbar
+                                        .make(rootView,
+                                                "Token has expired. Please login again",
+                                                Snackbar.LENGTH_LONG)
+                                        .setAction("LOGIN", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                startActivity(new Intent(ReserveSlotActivity.this, LoginActivity.class));
+                                            }
+                                        }).show();
+                                return;
+                            } else {
                                 Toast.makeText(ReserveSlotActivity.this,
-                                        "Created event: " + body.getId(),
-                                        Toast.LENGTH_SHORT)
-                                        .show();
-
-                                setResult(RESULT_OK);
-                                finish();
+                                        "Err: " + (!TextUtils.isEmpty(response.message()) ? response.message() : response.code()),
+                                        Toast.LENGTH_SHORT).show();
                             }
 
-                            @Override
-                            public void onFailure(Call<Event> call, Throwable t) {
-                                Toast.makeText(ReserveSlotActivity.this, "onFailure", Toast.LENGTH_SHORT).show();
 
-                            }
-                        });
+                            setResult(RESULT_CANCELED);
+                            return;
+                        }
+
+                        Event body = response.body();
+
+                        if (body == null) {
+                            Timber.wtf("event create API response body MUST NOT be empty");
+                        } else {
+                            Toast.makeText(ReserveSlotActivity.this,
+                                    "Created event: " + body.getId(),
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
+                        Toast.makeText(ReserveSlotActivity.this,
+                                "Error: " + t.getLocalizedMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 
@@ -163,6 +201,23 @@ public class ReserveSlotActivity extends AppCompatActivity {
                 picker("end");
             }
         });
+    }
+
+    private void initViewModel() {
+        loginViewModel = new ViewModelProvider(this)
+                .get(LoginViewModel.class);
+
+        loginViewModel.getLoggedInStatusObservable()
+                .observe(this, loggedInStatus -> {
+                    mLoggedInStatus = loggedInStatus;
+                    if (mLoggedInStatus != null
+                            && mLoggedInStatus.isLoggedIn()
+                            && mLoggedInStatus.getUser() != null) {
+                        token = mLoggedInStatus.getUser().getToken();
+                        username = mLoggedInStatus.getUser().getUsername();
+                    }
+                });
+
     }
 
 
