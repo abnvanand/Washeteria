@@ -6,6 +6,10 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "github.abnvanand.washeteria"
         minSdkVersion 27
