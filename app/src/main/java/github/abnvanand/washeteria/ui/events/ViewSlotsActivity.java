@@ -19,11 +19,8 @@ import java.util.List;
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.dashboard.MainActivity;
-import github.abnvanand.washeteria.utils.DateConverters;
-import timber.log.Timber;
 
 public class ViewSlotsActivity extends AppCompatActivity {
-
     private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
     ArrayList<Integer> eventColors = new ArrayList<>();
@@ -93,7 +90,7 @@ public class ViewSlotsActivity extends AppCompatActivity {
             Event event = events.get(i);
             Calendar eventStartCal = Calendar.getInstance();
             eventStartCal.setTimeInMillis(event.getStartsAtMillis());
-            Calendar eventEndCal =Calendar.getInstance();
+            Calendar eventEndCal = Calendar.getInstance();
             eventEndCal.setTimeInMillis(event.getEndsAtMillis());
 
 
@@ -108,7 +105,8 @@ public class ViewSlotsActivity extends AppCompatActivity {
                             event.getLocationId(),
                             event.getMachineId()),
                     event.getCreator(),
-                    eventColors.get(i % eventColors.size())
+                    eventColors.get(i % eventColors.size()),
+                    false
             );
             weekViewDisplayableList.add(bookingEvent);
         }

@@ -8,31 +8,17 @@
     android:orientation="vertical"
     tools:context=".ui.events.ViewSlotsActivity">
 
-    <include layout="@layout/view_toolbar" />
-    <!--    <com.alamkanak.weekview.WeekView-->
-    <!--        android:id="@+id/weekView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        app:columnGap="8dp"-->
-    <!--        app:dayBackgroundColor="#fff"-->
-    <!--        app:defaultEventColor="@color/colorAccent"-->
-    <!--        app:eventTextColor="#fff"-->
-    <!--        app:headerRowBackgroundColor="@android:color/darker_gray"-->
-    <!--        app:headerRowPadding="12dp"-->
-    <!--        app:hourHeight="60dp"-->
-    <!--        app:numberOfVisibleDays="1"-->
-    <!--        app:timeColumnBackgroundColor="#fff"-->
-    <!--        app:timeColumnPadding="8dp"-->
-    <!--        app:timeColumnTextColor="@android:color/holo_blue_light"-->
-    <!--        app:timeColumnTextSize="12sp"-->
-    <!--        app:todayBackgroundColor="#fffeee" />-->
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/view_toolbar" />
+
     <com.alamkanak.weekview.WeekView
         android:id="@+id/weekView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:columnGap="1dp"
-        app:eventCornerRadius="4dp"
         app:defaultEventColor="@color/colorAccent"
+        app:eventCornerRadius="4dp"
         app:eventTextColor="@android:color/white"
         app:headerRowBottomLineColor="@color/header_bottom_line"
         app:headerRowBottomLineWidth="1dp"

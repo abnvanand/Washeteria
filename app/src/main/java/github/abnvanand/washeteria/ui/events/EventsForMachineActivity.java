@@ -5,12 +5,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -23,8 +21,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import github.abnvanand.washeteria.R;
+import github.abnvanand.washeteria.databinding.ActivityEventsBinding;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
@@ -41,28 +41,30 @@ public class EventsForMachineActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "clicked_event_id";
     public static final int REQUEST_EVENT_CREATION_STATUS = 1003;
     public static final int REQUEST_EVENT_CANCEL_STATUS = 1004;
+
+    private ActivityEventsBinding binding;
     private LoggedInStatus mLoggedInStatus;
     private Snackbar loginSnackbar;
-    private WeekView<BookingEvent> weekView;
     private EventsViewModel mViewModel;
 
     private ArrayList<Integer> eventColors = new ArrayList<>();
     private Map<Integer, String> bookingIdToEventIdMapping = new HashMap<>();
-    private LinearLayout rootLayout;
-    String machineId;
+    private String machineId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_events);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityEventsBinding.inflate(getLayoutInflater());
+        View rootView = binding.getRoot();
+        setContentView(rootView);
 
-        rootLayout = findViewById(R.id.rootLayout);
+        setSupportActionBar(binding.toolbarInclude.toolbar);
+
+//        rootLayout = findViewById(R.id.rootLayout);
 
         // TODO: Add action to go to login screen
         loginSnackbar = Snackbar
-                .make(rootLayout, "You must login to perform this action.", Snackbar.LENGTH_LONG)
+                .make(rootView, "You must login to perform this action.", Snackbar.LENGTH_LONG)
                 .setAction("LOGIN", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -73,21 +75,24 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
         machineId = getIntent().getStringExtra(EXTRA_SELECTED_MACHINE_ID);
 
+        processColorResources();
+
+        WeekView<BookingEvent> weekView = binding.weekView;
+        limitWeekViewRange(weekView);
+
+        initViewModel(machineId, weekView);
+
+        setupListeners(weekView);
+    }
+
+    private void processColorResources() {
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_03));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_04));
-
-        weekView = findViewById(R.id.weekView);
-
-        limitWeekViewRange();
-
-        initViewModel(machineId);
-
-        setupListeners();
     }
 
-    private void initViewModel(String machineId) {
+    private void initViewModel(String machineId, WeekView<BookingEvent> weekView) {
         LoginViewModel loginViewModel = new ViewModelProvider(this)
                 .get(LoginViewModel.class);
 
@@ -103,12 +108,12 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
         mViewModel.getEventsByMachineObservable()
                 .observe(this, events -> {
-                    fillCalendarView(events);
+                    fillCalendarView(events, weekView);
                 });
 
     }
 
-    private void setupListeners() {
+    private void setupListeners(WeekView<BookingEvent> weekView) {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
             String creator = bookingEvent.getCreator();
 
@@ -138,9 +143,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
             // TODO: make sure
-            if (mLoggedInStatus == null
-                    || !mLoggedInStatus.isLoggedIn()
-                    || mLoggedInStatus.getUser() == null) {
+            if (mLoggedInStatus == null || !mLoggedInStatus.isLoggedIn() || mLoggedInStatus.getUser() == null) {
                 loginSnackbar
                         .setText("You must be logged in to reserve a slot.")
                         .show();
@@ -168,7 +171,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
         }
     }
 
-    private void limitWeekViewRange() {
+    private void limitWeekViewRange(WeekView<BookingEvent> weekView) {
         Calendar now = Calendar.getInstance();
 
         Calendar max = (Calendar) now.clone();
@@ -178,7 +181,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
         weekView.setMaxDate(max);
     }
 
-    private void fillCalendarView(List<Event> events) {
+    private void fillCalendarView(List<Event> events, WeekView<BookingEvent> weekView) {
         Timber.d("Events: %s", events);
         List<WeekViewDisplayable<BookingEvent>> weekViewDisplayableList = new ArrayList<>();
 
@@ -189,6 +192,10 @@ public class EventsForMachineActivity extends AppCompatActivity {
             eventStartCal.setTimeInMillis(event.getStartsAtMillis());
             Calendar eventEndCal = Calendar.getInstance();
             eventEndCal.setTimeInMillis(event.getEndsAtMillis());
+
+            boolean iAmTheCreator = mLoggedInStatus != null
+                    && mLoggedInStatus.getUser() != null
+                    && Objects.equals(mLoggedInStatus.getUser().getUsername(), event.getCreator());
 
             BookingEvent bookingEvent = new
                     BookingEvent(
@@ -201,7 +208,8 @@ public class EventsForMachineActivity extends AppCompatActivity {
                             event.getLocationId(),
                             event.getMachineId()),
                     event.getCreator(),
-                    eventColors.get(i % eventColors.size())
+                    eventColors.get(i % eventColors.size()),
+                    iAmTheCreator
             );
             bookingIdToEventIdMapping.put(i, event.getId());
             weekViewDisplayableList.add(bookingEvent);
@@ -225,12 +233,12 @@ public class EventsForMachineActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_today) {
-            weekView.goToToday();
+            binding.weekView.goToToday();
             return true;
         } else {
-            if (id != WeekViewType.getAction(weekView.getNumberOfVisibleDays())) {
+            if (id != WeekViewType.getAction(binding.weekView.getNumberOfVisibleDays())) {
                 item.setChecked(!item.isChecked());
-                weekView.setNumberOfVisibleDays(WeekViewType.getNumVisibleDays(item.getItemId()));
+                binding.weekView.setNumberOfVisibleDays(WeekViewType.getNumVisibleDays(item.getItemId()));
             }
             return true;
         }

@@ -19,6 +19,7 @@ public class BookingEvent implements WeekViewDisplayable<BookingEvent> {
     private String machineName;
     private String creator;
     private Integer color;
+    private boolean isMyEvent;
 
     public BookingEvent() {
     }
@@ -29,7 +30,8 @@ public class BookingEvent implements WeekViewDisplayable<BookingEvent> {
                  boolean cancelled,
                  String machineName,
                  String creator,
-                 Integer color) {
+                 Integer color,
+                 boolean isMyEvent) {
         this.id = id;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
@@ -37,6 +39,7 @@ public class BookingEvent implements WeekViewDisplayable<BookingEvent> {
         this.machineName = machineName;
         this.creator = creator;
         this.color = color;
+        this.isMyEvent = isMyEvent;
     }
 
     public int getId() {
@@ -65,6 +68,14 @@ public class BookingEvent implements WeekViewDisplayable<BookingEvent> {
 
     public boolean isCancelled() {
         return cancelled;
+    }
+
+    public boolean isMyEvent() {
+        return isMyEvent;
+    }
+
+    public void setMyEvent(boolean myEvent) {
+        isMyEvent = myEvent;
     }
 
     public void setCancelled(boolean cancelled) {
@@ -98,9 +109,9 @@ public class BookingEvent implements WeekViewDisplayable<BookingEvent> {
     @NotNull
     @Override
     public WeekViewEvent<BookingEvent> toWeekViewEvent() {
-        int backgroundColor = (!cancelled) ? color : Color.WHITE;
-        int textColor = !cancelled ? Color.WHITE : color;
-        int borderWidthResId = (!cancelled) ? R.dimen.no_border_width : R.dimen.border_width;
+        int backgroundColor = (isMyEvent) ? color : Color.WHITE;
+        int textColor = (isMyEvent) ? Color.WHITE : color;
+        int borderWidthResId = (isMyEvent) ? R.dimen.no_border_width : R.dimen.border_width;
 
         WeekViewEvent.Style style = new WeekViewEvent.Style.Builder()
                 .setTextColor(textColor)
