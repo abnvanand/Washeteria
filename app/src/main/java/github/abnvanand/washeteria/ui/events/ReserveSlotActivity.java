@@ -4,17 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -32,7 +26,9 @@ import java.util.concurrent.Executors;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.database.AppDatabase;
+import github.abnvanand.washeteria.databinding.ActivityReserveSlotBinding;
 import github.abnvanand.washeteria.models.Event;
+import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
@@ -41,6 +37,7 @@ import github.abnvanand.washeteria.shareprefs.SessionManager;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
+import github.abnvanand.washeteria.utils.Constants;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,157 +47,159 @@ import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXT
 import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_MACHINE_ID;
 
 public class ReserveSlotActivity extends AppCompatActivity {
-    private int SLOT_MAX_LIMIT_MINUTES = 50;
-    LoginViewModel loginViewModel;
+    private ActivityReserveSlotBinding binding;
 
-    Executor executor = Executors.newSingleThreadExecutor();
-    EventCreateBody eventCreateBody;
-    String token;
-    String username;
-    Calendar startsAt;
-    Calendar endsAt;
-    EditText startsAtEditText;
-    EditText endsAtEditText;
+    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
+
+
+    private static final String durationValueFormat = "%.0f";
+    private LoginViewModel loginViewModel;
+
+    private Executor executor = Executors.newSingleThreadExecutor();
+//    private EventCreateBody eventCreateBody;
+
+    private String token;
+    private String username;
+
+    private Calendar startsAtCalendarObject;
+    private Calendar endsAtCalendarObject;
+
     private LoggedInStatus mLoggedInStatus;
-    LinearLayout rootView;
+    private Machine machine;
+    private Location location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reserve_slot);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityReserveSlotBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        rootView = findViewById(R.id.rootView);
-
-        TextView machineNameTV = findViewById(R.id.machineName);
-        startsAtEditText = findViewById(R.id.startsAtDate);
-        endsAtEditText = findViewById(R.id.endsAtDate);
-        ImageButton editStartsAt = findViewById(R.id.btnEditStartsAt);
-        ImageButton editEndsAt = findViewById(R.id.btnEditEndsAt);
-
-        Button btnSubmit = findViewById(R.id.btnReserveSlot);
+        setSupportActionBar(binding.toolbarInclude.toolbar);
 
         String machineId = getIntent().getStringExtra(EXTRA_MACHINE_ID);
         long millis = getIntent().getLongExtra(EXTRA_CLICKED_MILLIS, -1);
 
         if (millis == -1)
-            Timber.wtf("This is fucked up");
-
-        initViewModel();
+            Timber.wtf("Millis can't be empty");
 
 
-        startsAt = Calendar.getInstance();
-        startsAt.setTime(new Date(millis));
+        binding.durationSlider.setValueFrom(Constants.MIN_DURATION);
+        binding.durationSlider.setValueTo(Constants.MAX_DURATION);
+        binding.durationSlider.setValue(Constants.DEFAULT_DURATION);
+        binding.durationSliderValue
+                .setText(String.format(Locale.ENGLISH, durationValueFormat,
+                        binding.durationSlider.getValue()));
 
-        endsAt = (Calendar) startsAt.clone();
-        endsAt.add(Calendar.MINUTE, SLOT_MAX_LIMIT_MINUTES);
+
+        startsAtCalendarObject = Calendar.getInstance();
+        startsAtCalendarObject.setTime(new Date(millis));
+        updateUiWithStartEndTime(startsAtCalendarObject, binding.durationSlider.getValue());
 
         executor.execute(() -> {
             SessionManager sessionManager = new SessionManager(this);
             token = sessionManager.getToken();
             username = sessionManager.getUsername();
 
-
             AppDatabase mdb = AppDatabase.getInstance(ReserveSlotActivity.this);
-            Machine machine = mdb.machineDao().getMachineById(machineId);
 
-            machineNameTV.setText(machine.getName());
+            machine = mdb.machineDao().getMachineById(machineId);
+            location = mdb.locationDao().getLocationById(machine.getLocationId());
 
-            eventCreateBody = new EventCreateBody(machine.getId(),
-                    machine.getLocationId(),
-                    startsAt.getTimeInMillis(),
-                    endsAt.getTimeInMillis(),
-                    false,
-                    username
-            );
+            binding.machineName.setText(machine.getName());
+            binding.locationName.setText(location.getName());
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // Enable the button after everything is ready to be submitted
-                    btnSubmit.setEnabled(true);
-                }
+            runOnUiThread(() -> {
+                // Enable the button after everything is ready to be submitted
+                binding.btnReserveSlot.setEnabled(true);
             });
         });
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault());
-        startsAtEditText.setText(dateFormat.format(startsAt.getTime()));
-        endsAtEditText.setText(dateFormat.format(endsAt.getTime()));
+        setupListeners();
 
+        initViewModel();
+    }
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                WebService webService = RetrofitSingleton.getAuthorizedInstance(token)
-                        .create(WebService.class);
-                webService.createEvent(eventCreateBody).enqueue(new Callback<Event>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
-                        if (!response.isSuccessful()) {
-                            if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                                // TODO: Register with login viewmodel and call logout
-                                loginViewModel.logout();
-                                Snackbar
-                                        .make(rootView,
-                                                "Token has expired. Please login again",
-                                                Snackbar.LENGTH_LONG)
-                                        .setAction("LOGIN", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                startActivity(new Intent(ReserveSlotActivity.this, LoginActivity.class));
-                                            }
-                                        }).show();
-                                return;
-                            } else {
-                                Toast.makeText(ReserveSlotActivity.this,
-                                        "Err: " + (!TextUtils.isEmpty(response.message()) ? response.message() : response.code()),
-                                        Toast.LENGTH_SHORT).show();
-                            }
+    private void setupListeners() {
+        binding.durationSlider.addOnChangeListener((slider, value, fromUser) -> {
+            binding.durationSliderValue
+                    .setText(String.format(Locale.ENGLISH, durationValueFormat, value));
 
+            updateUiWithStartEndTime(startsAtCalendarObject, value);
+        });
 
-                            setResult(RESULT_CANCELED);
+        View.OnClickListener btnEditStartTime = v -> picker();
+        binding.startsAtWidget.eventTime.setOnClickListener(btnEditStartTime);
+        binding.startsAtWidget.btnEditStartsAt.setOnClickListener(btnEditStartTime);
+
+        View.OnClickListener btnSubmitClickListener = v -> {
+            EventCreateBody eventCreateBody =
+                    new EventCreateBody(
+                            machine.getId(),
+                            machine.getLocationId(),
+                            startsAtCalendarObject.getTimeInMillis(),
+                            endsAtCalendarObject.getTimeInMillis(),
+                            false,
+                            username
+                    );
+
+            WebService webService = RetrofitSingleton.getAuthorizedInstance(token)
+                    .create(WebService.class);
+
+            webService.createEvent(eventCreateBody).enqueue(new Callback<Event>() {
+                @Override
+                public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
+                    if (!response.isSuccessful()) {
+                        if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                            loginViewModel.logout();
+                            Snackbar.make(
+                                    binding.getRoot(),
+                                    "Token has expired. Please login again",
+                                    Snackbar.LENGTH_LONG)
+                                    .setAction("LOGIN",
+                                            v1 -> startActivity(
+                                                    new Intent(ReserveSlotActivity.this,
+                                                            LoginActivity.class)))
+                                    .show();
                             return;
-                        }
-
-                        Event body = response.body();
-
-                        if (body == null) {
-                            Timber.wtf("event create API response body MUST NOT be empty");
                         } else {
                             Toast.makeText(ReserveSlotActivity.this,
-                                    "Created event: " + body.getId(),
-                                    Toast.LENGTH_SHORT)
-                                    .show();
+                                    "Err: " +
+                                            (!TextUtils.isEmpty(response.message()) ?
+                                                    response.message() :
+                                                    response.code()),
+                                    Toast.LENGTH_SHORT).show();
                         }
 
-                        setResult(RESULT_OK);
-                        finish();
+                        setResult(RESULT_CANCELED);
+                        return;
                     }
 
-                    @Override
-                    public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
+                    Event body = response.body();
+
+                    if (body == null) {
+                        Timber.wtf("event create API response body MUST NOT be empty");
+                    } else {
                         Toast.makeText(ReserveSlotActivity.this,
-                                "Error: " + t.getLocalizedMessage(),
-                                Toast.LENGTH_LONG).show();
+                                "Created event: " + body.getId(),
+                                Toast.LENGTH_SHORT)
+                                .show();
                     }
-                });
-            }
-        });
 
-        editStartsAt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                picker("start");
-            }
-        });
+                    setResult(RESULT_OK);
+                    finish();
+                }
 
-        editEndsAt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                picker("end");
-            }
-        });
+                @Override
+                public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
+                    Toast.makeText(ReserveSlotActivity.this,
+                            "Error: " + t.getLocalizedMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+        };
+
+        binding.btnReserveSlot.setOnClickListener(btnSubmitClickListener);
     }
 
     private void initViewModel() {
@@ -221,38 +220,56 @@ public class ReserveSlotActivity extends AppCompatActivity {
     }
 
 
-    void picker(String type) {
+    void picker() {
         final View dialogView = View.inflate(this, R.layout.date_time_picker, null);
+
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        TimePicker timePicker = dialogView.findViewById(R.id.time_picker);
+        timePicker.setHour(startsAtCalendarObject.get(Calendar.HOUR_OF_DAY));
+        timePicker.setMinute(startsAtCalendarObject.get(Calendar.MINUTE));
 
 
         dialogView.findViewById(R.id.btn_set)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                .setOnClickListener(view -> {
+//                    TimePicker timePicker = dialogView.findViewById(R.id.time_picker);
 
-                        TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
+                    Calendar newCalendar = new GregorianCalendar(startsAtCalendarObject.get(Calendar.YEAR),
+                            startsAtCalendarObject.get(Calendar.MONTH),
+                            startsAtCalendarObject.get(Calendar.DAY_OF_MONTH),
+                            timePicker.getHour(),
+                            timePicker.getMinute());
 
-                        Calendar newCalendar = new GregorianCalendar(startsAt.get(Calendar.YEAR),
-                                startsAt.get(Calendar.MONTH),
-                                startsAt.get(Calendar.DAY_OF_MONTH),
-                                timePicker.getCurrentHour(),
-                                timePicker.getCurrentMinute());
+                    alertDialog.dismiss();
 
-                        alertDialog.dismiss();
-                        if (type.equalsIgnoreCase("start")) {
-                            startsAt = newCalendar;
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault());
+                    startsAtCalendarObject = newCalendar;
 
-                            startsAtEditText.setText(dateFormat.format(startsAt.getTime()));
-                        } else if (type.equalsIgnoreCase("end")) {
-                            endsAt = newCalendar;
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault());
-                            endsAtEditText.setText(dateFormat.format(endsAt.getTime()));
-                        }
-                    }
+                    updateUiWithStartEndTime(startsAtCalendarObject, binding.durationSlider.getValue());
                 });
         alertDialog.setView(dialogView);
         alertDialog.show();
+    }
+
+    private void updateUiWithStartEndTime(Calendar startsAtCalendarObject, float durationSliderValue) {
+        endsAtCalendarObject = (Calendar) startsAtCalendarObject.clone();
+        endsAtCalendarObject.add(Calendar.MINUTE, (int) durationSliderValue);
+
+        binding.startsAtWidget.eventDate
+                .setText(dateFormat.format(startsAtCalendarObject.getTime()));
+        binding.startsAtWidget.eventTime
+                .setText(timeFormat.format(startsAtCalendarObject.getTime()));
+
+
+        binding.endsAtWidget.eventDate
+                .setText(dateFormat.format(endsAtCalendarObject.getTime()));
+        binding.endsAtWidget.eventTime
+                .setText(timeFormat.format(endsAtCalendarObject.getTime()));
+
+        Timber.d("StartsAtCalendar Object %s %s",
+                dateFormat.format(startsAtCalendarObject.getTime()),
+                timeFormat.format(startsAtCalendarObject.getTime()));
+
+        Timber.d("EndsAtCalendar Object %s %s",
+                dateFormat.format(endsAtCalendarObject.getTime()),
+                timeFormat.format(endsAtCalendarObject.getTime()));
     }
 }

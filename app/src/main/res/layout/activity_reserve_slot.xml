@@ -7,7 +7,9 @@
     android:orientation="vertical"
     tools:context=".ui.events.ReserveSlotActivity">
 
-    <include layout="@layout/view_toolbar" />
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/view_toolbar" />
 
 
     <LinearLayout
@@ -20,8 +22,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:orientation="horizontal">
 
             <TextView
@@ -29,96 +29,93 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Machine"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <TextView
                 android:id="@+id/machineName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorPrimaryDark"
+                android:textAppearance="?attr/textAppearanceHeadline4"
+                android:textSize="25sp"
                 tools:text="OBH1" />
         </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Starts At"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:orientation="horizontal">
-
-
-            <EditText
-                android:id="@+id/startsAtDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="false"
-                android:focusable="false"
-                android:longClickable="false" />
-
-            <ImageButton
-                android:id="@+id/btnEditStartsAt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_edit_black_24dp" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ends At"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="horizontal">
 
-
-            <EditText
-                android:id="@+id/endsAtDate"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:clickable="false"
-                android:focusable="false"
-                android:longClickable="false" />
+                android:text="Location"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-            <ImageButton
-                android:id="@+id/btnEditEndsAt"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/locationName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_edit_black_24dp" />
+                android:layout_weight="1"
+                android:textAppearance="?attr/textAppearanceHeadline4"
+                android:textSize="25sp"
+                tools:text="Old boys hostel" />
         </LinearLayout>
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:background="#e0e0e0"
+            android:contentDescription="divider" />
+
+        <include
+            android:id="@+id/startsAtWidget"
+            layout="@layout/content_starts_at" />
+
+        <include
+            android:id="@+id/endsAtWidget"
+            layout="@layout/content_ends_at" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select duration" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical">
 
-
             <com.google.android.material.slider.Slider
-                android:id="@+id/slider_2"
-                android:layout_width="match_parent"
+                android:id="@+id/durationSlider"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_weight="1"
                 android:stepSize="1"
-                android:theme="@style/ThemeOverlay.PrimaryPalette.Orange"
                 android:valueFrom="1"
                 android:valueTo="60" />
+
+            <TextView
+                android:id="@+id/durationSliderValue"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                tools:text="30" />
         </LinearLayout>
 
+
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            tools:visibility="visible" />
 
         <Button
             android:id="@+id/btnReserveSlot"
