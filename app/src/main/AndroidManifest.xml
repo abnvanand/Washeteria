@@ -28,6 +28,7 @@
         </activity>
         <activity android:name=".ui.events.ReserveSlotActivity" />
         <activity android:name=".ui.events.CancelReservationActivity" />
+        <activity android:name=".ui.assistant.AssistantActivity" />
     </application>
 
 </manifest>

@@ -26,6 +26,7 @@ import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.ui.assistant.AssistantActivity;
 import github.abnvanand.washeteria.ui.events.EventsForMachineActivity;
 import github.abnvanand.washeteria.ui.events.ViewSlotsActivity;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
@@ -180,6 +181,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, ViewSlotsActivity.class);
             intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
             startActivity(intent);
+        } else if (R.id.action_assistant == id) {
+            startActivity(new Intent(this, AssistantActivity.class));
         }
         return false;
     }
