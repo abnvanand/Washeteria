@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootView"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.events.ReserveSlotActivity">
 
-    <include
-        layout="@layout/view_toolbar" />
+    <include layout="@layout/view_toolbar" />
 
 
     <LinearLayout
@@ -20,9 +18,9 @@
 
 
         <LinearLayout
-            android:layout_marginTop="100dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:orientation="horizontal">
 
@@ -97,10 +95,28 @@
                 android:longClickable="false" />
 
             <ImageButton
-                android:layout_width="wrap_content"
                 android:id="@+id/btnEditEndsAt"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_edit_black_24dp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:stepSize="1"
+                android:theme="@style/ThemeOverlay.PrimaryPalette.Orange"
+                android:valueFrom="1"
+                android:valueTo="60" />
         </LinearLayout>
 
 
