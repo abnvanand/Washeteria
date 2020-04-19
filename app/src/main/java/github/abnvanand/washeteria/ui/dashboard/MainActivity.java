@@ -7,10 +7,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +22,7 @@ import java.util.List;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.adapters.MachineAdapter;
+import github.abnvanand.washeteria.databinding.ActivityMainBinding;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.ui.assistant.AssistantActivity;
@@ -35,41 +34,39 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemSelectedListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
+        implements AdapterView.OnItemClickListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
+
     public static final String EXTRA_SELECTED_LOCATION_ID = "EXTRA_CURR_LOC_ID";
     public static final String EXTRA_SELECTED_MACHINE_ID = "EXTRA_SELECTED_MACHINE";
-    private Location currentLocation;
 
-    private List<Machine> machines = new ArrayList<>();
-    private MachineAdapter machineAdapter;
+    private ActivityMainBinding binding;
+
     private MainViewModel mViewModel;
 
-    private RecyclerView mRecyclerView;
-    private Spinner spinner;
-    private SwipeRefreshLayout pullToRefresh;
+    private MachineAdapter machineAdapter;
+    private List<Machine> machines = new ArrayList<>();
+    private Location currentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        FabSpeedDial fab = findViewById(R.id.fabSpeedDial);
-        fab.setMenuListener(this);
+        setSupportActionBar(binding.toolbarInclude.toolbar);
 
-        spinner = findViewById(R.id.locationSelector);
-        mRecyclerView = findViewById(R.id.recyclerView);
-        pullToRefresh = findViewById(R.id.pullToRefresh);
-
-        spinner.setOnItemSelectedListener(this);
-        pullToRefresh.setOnRefreshListener(this);
-
-        initRecyclerView();
+        setupListeners();
+        initRecyclerView(binding.contentMain.recyclerView);
         initViewModel();
     }
 
-    private void initRecyclerView() {
+    private void setupListeners() {
+        binding.fabSpeedDial.setMenuListener(this);
+        binding.locationWidget.locationSelector.setOnItemClickListener(this);
+        binding.contentMain.pullToRefresh.setOnRefreshListener(this);
+    }
+
+    private void initRecyclerView(RecyclerView mRecyclerView) {
         mRecyclerView.setHasFixedSize(true); // Each item of same height save sore re-measurements
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -79,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.addItemDecoration(divider);
 
         ItemClickSupport.addTo(mRecyclerView)
-                .setOnItemClickListener((recyclerView, position, v) -> {
+                .setOnItemClickListener((view, position, v) -> {
                     Intent intent = new Intent(MainActivity.this, EventsForMachineActivity.class);
                     intent.putExtra(EXTRA_SELECTED_MACHINE_ID,
                             machineAdapter.getItem(position).getId());
@@ -92,7 +89,7 @@ public class MainActivity extends AppCompatActivity
                 .get(MainViewModel.class);
 
         mViewModel.getLocationListObservable().observe(this,
-                this::fillLocationSpinner);
+                this::fillLocations);
 
         mViewModel.getMachinesListObservable().observe(this,
                 machineEntities -> {
@@ -104,18 +101,17 @@ public class MainActivity extends AppCompatActivity
                         machineAdapter = new MachineAdapter(
                                 MainActivity.this,
                                 machines);
-                        mRecyclerView.setAdapter(machineAdapter);
+                        binding.contentMain.recyclerView.setAdapter(machineAdapter);
                     } else {
                         machineAdapter.notifyDataSetChanged();
                     }
 
-                    if (pullToRefresh.isRefreshing())
-                        pullToRefresh.setRefreshing(false);
+                    if (binding.contentMain.pullToRefresh.isRefreshing())
+                        binding.contentMain.pullToRefresh.setRefreshing(false);
                 });
     }
 
-    private void fillLocationSpinner(List<Location> locations) {
-        // Creating adapter for spinner
+    private void fillLocations(List<Location> locations) {
         ArrayAdapter<Location> locationArrayAdapter =
                 new ArrayAdapter<>(this,
                         android.R.layout.simple_spinner_item,
@@ -124,10 +120,7 @@ public class MainActivity extends AppCompatActivity
         locationArrayAdapter
                 .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        // attaching data adapter to spinner
-        spinner.setAdapter(locationArrayAdapter);
-
-        Timber.d("locationArrayAdapter: %s", locationArrayAdapter);
+        binding.locationWidget.locationSelector.setAdapter(locationArrayAdapter);
     }
 
     @Override
@@ -156,16 +149,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        // On selecting a spinner item
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         currentLocation = (Location) parent.getItemAtPosition(position);
+        Timber.d("onItemClick location: %s", currentLocation);
         mViewModel.getData(currentLocation.getId());
-        pullToRefresh.setRefreshing(true);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
+        binding.contentMain.pullToRefresh.setRefreshing(true);
     }
 
     @Override
@@ -194,7 +182,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRefresh() {
-        Location location = (Location) spinner.getSelectedItem();
-        mViewModel.getData(location.getId());
+        mViewModel.getData(currentLocation.getId());
     }
 }

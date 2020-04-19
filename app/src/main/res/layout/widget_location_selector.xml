@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/prompt_select_location"-->
+<!--            android:textAppearance="@style/TextAppearance.AppCompat.Large" />-->
+
+<!--        <Spinner-->
+<!--            android:id="@+id/locationSelector"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="50dp"-->
+<!--            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
+<!--            android:prompt="@string/prompt_select_location" />-->
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:id="@+id/locationTextInputLayout"-->
+<!--            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="4dp"-->
+<!--            android:hint="Select location"-->
+<!--            app:errorEnabled="true"-->
+<!--            app:helperText="Choose a location to view machines"-->
+<!--            app:helperTextEnabled="true">-->
+
+<!--            <AutoCompleteTextView-->
+<!--                android:id="@+id/locationSelector"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content" />-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:hint="@string/hint_select_location_mini"
+    app:errorEnabled="true"
+    app:helperText="@string/hint_select_location"
+    app:helperTextEnabled="true"
+    tools:showIn="@layout/activity_main">
+
+    <AutoCompleteTextView
+        android:id="@+id/locationSelector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="none" />
+
+
+</com.google.android.material.textfield.TextInputLayout>
+
+        

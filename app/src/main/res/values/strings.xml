@@ -126,4 +126,6 @@
     <string name="text_login_header">Please use you IIIT H credentials</string>
     <string name="hint_token">Token</string>
     <string name="hint_expires_at">Expires At</string>
+    <string name="hint_select_location_mini">Select location</string>
+    <string name="hint_select_location">Choose a location to view machines.</string>
 </resources>

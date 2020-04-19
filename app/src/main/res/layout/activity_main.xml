@@ -6,59 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".ui.dashboard.MainActivity">
 
-    <include layout="@layout/view_toolbar" />
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/view_toolbar" />
 
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/appBarLayout"
+        android:layout_below="@id/toolbarInclude"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:orientation="vertical">
 
-        <TextView
+        <include
+            android:id="@+id/locationWidget"
+            layout="@layout/widget_location_selector" />
+
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/prompt_select_location"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-        <Spinner
-            android:id="@+id/locationSelector"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:prompt="@string/prompt_select_location" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#252525" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:text="Machine"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:text="Status"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-        </LinearLayout>
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?attr/colorPrimary"
+            android:contentDescription="divider" />
 
     </LinearLayout>
 
     <include
+        android:id="@+id/contentMain"
         layout="@layout/content_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
