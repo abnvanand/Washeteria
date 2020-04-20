@@ -29,6 +29,8 @@ import github.abnvanand.washeteria.adapters.MachineAdapter;
 import github.abnvanand.washeteria.databinding.ActivityMainBinding;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.Resource;
+import github.abnvanand.washeteria.models.pojo.Status;
 import github.abnvanand.washeteria.ui.assistant.AssistantActivity;
 import github.abnvanand.washeteria.ui.events.EventsForMachineActivity;
 import github.abnvanand.washeteria.ui.events.ViewSlotsActivity;
@@ -93,13 +95,16 @@ public class MainActivity extends AppCompatActivity
         mViewModel = new ViewModelProvider(this)
                 .get(MainViewModel.class);
 
-        mViewModel.getLocationListObservable().observe(this,
-                new Observer<List<Location>>() {
-                    @Override
-                    public void onChanged(List<Location> locations) {
-                        MainActivity.this.fillLocations(locations);
-                    }
-                });
+        mViewModel.getLocationListObservable().observe(this, new Observer<Resource<List<Location>>>() {
+            @Override
+            public void onChanged(Resource<List<Location>> listResource) {
+                setLocationProgress(listResource.getStatus());
+
+                List<Location> locations = listResource.getData();
+                if (locations != null)
+                    MainActivity.this.fillLocations(locations);
+            }
+        });
 
         mViewModel.getMachinesListObservable().observe(this,
                 machineEntities -> {

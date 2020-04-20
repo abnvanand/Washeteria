@@ -15,6 +15,8 @@ import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.Resource;
+import github.abnvanand.washeteria.models.pojo.Status;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import retrofit2.Call;
@@ -26,7 +28,7 @@ public class AppRepository {
     private static AppRepository instance;// TODO: Make volatile maybe?
     //    public MutableLiveData<List<Machine>> machines;
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
-    private MutableLiveData<List<Location>> locationListObservable = new MutableLiveData<>();
+    private MutableLiveData<Resource<List<Location>>> locationListObservable = new MutableLiveData<Resource<List<Location>>>();
     private MutableLiveData<List<Event>> eventsByLocationObservable = new MutableLiveData<>();
     private MutableLiveData<List<Event>> eventsByMachineObservable = new MutableLiveData<>();
 
@@ -111,16 +113,19 @@ public class AppRepository {
         return machineListObservable;
     }
 
-    public MutableLiveData<List<Location>> getLocationListObservable() {
+    public MutableLiveData<Resource<List<Location>>> getLocationListObservable() {
         return locationListObservable;
     }
 
     public void fetchLocations() {
-        loadLocationsFromDb();
+        loadLocationsFromDb(Status.LOADING);
         fetchLocationsFromWeb();
     }
 
     private void fetchLocationsFromWeb() {
+        // Set observable status to loading
+        locationListObservable.postValue(new Resource<List<Location>>().loading(null));
+
         webService.getLocations()
                 .enqueue(new Callback<List<Location>>() {
                     @Override
@@ -128,10 +133,10 @@ public class AppRepository {
                                            @NotNull Response<List<Location>> response) {
                         if (!response.isSuccessful()) {
                             showError(response.message());
-                            return;
-                        }
-
-                        if (response.body() != null) {
+                            locationListObservable.postValue(
+                                    new Resource<List<Location>>()
+                                            .error(response.message(), null));
+                        } else if (response.body() != null) {
                             addLocationsToDb(response.body());
                         }
                     }
@@ -140,6 +145,9 @@ public class AppRepository {
                     public void onFailure(@NotNull Call<List<Location>> call,
                                           @NotNull Throwable t) {
                         showError(t.getLocalizedMessage());
+                        locationListObservable.postValue(
+                                new Resource<List<Location>>()
+                                        .error(t.getLocalizedMessage(), null));
                     }
                 });
     }
@@ -151,14 +159,18 @@ public class AppRepository {
     private void addLocationsToDb(List<Location> body) {
         executor.execute(() -> {
             mDb.locationDao().insertAll(body);
-            loadLocationsFromDb();
+            loadLocationsFromDb(Status.SUCCESS);
         });
     }
 
-    private void loadLocationsFromDb() {
+    private void loadLocationsFromDb(Status status) {
         executor.execute(() -> {
             List<Location> queryResults = mDb.locationDao().getAll();
-            locationListObservable.postValue(queryResults);
+            if (status == Status.LOADING)
+                locationListObservable.postValue(new Resource<List<Location>>().loading(queryResults));
+            else
+                locationListObservable.postValue(new Resource<List<Location>>().success(queryResults));
+
         });
     }
 
