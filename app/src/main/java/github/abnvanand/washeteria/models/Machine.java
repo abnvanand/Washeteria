@@ -23,7 +23,7 @@ public class Machine {
     @SerializedName("status")
     private String status;  // Vacant / Occupied / Malfunctioned
 
-    @SerializedName("nextAvaiableAt")
+    @SerializedName("nextAvailableAt")
     private Long nextAvailableAt;
     // TODO: Add a list of events of this machine
 
