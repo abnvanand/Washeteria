@@ -1,6 +1,8 @@
 package github.abnvanand.washeteria.ui.dashboard;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -117,6 +119,27 @@ public class MainActivity extends AppCompatActivity
                     if (binding.contentMain.pullToRefresh.isRefreshing())
                         binding.contentMain.pullToRefresh.setRefreshing(false);
                 });
+    }
+
+    private void setLocationProgress(Status status) {
+        if (status == Status.ERROR) {
+            binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.RED));
+            binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.RED));
+            binding.locationProgress.setIndeterminate(false);
+            binding.btnLocationReload.setVisibility(View.VISIBLE);
+        } else if (status == Status.SUCCESS) {
+            binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
+            binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
+            binding.locationProgress.setIndeterminate(false);
+            binding.locationProgress.setProgress(100);
+            binding.btnLocationReload.setVisibility(View.VISIBLE);
+        } else if (status == Status.LOADING) {
+            binding.locationProgress.setIndeterminate(true);
+            binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
+            binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
+            binding.locationProgress.setIndeterminateTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
+            binding.btnLocationReload.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void fillLocations(List<Location> locations) {

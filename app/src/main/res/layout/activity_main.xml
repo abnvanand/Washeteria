@@ -28,7 +28,18 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="?attr/colorPrimary"
-            android:contentDescription="divider" />
+            android:contentDescription="divider"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/location_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:indeterminate="true"
+            android:progressBackgroundTint="@color/colorPrimary"
+            android:progressTint="@color/colorPrimary" />
 
     </LinearLayout>
 
@@ -51,6 +62,16 @@
         app:miniFabBackgroundTint="@android:color/white"
         app:miniFabDrawableTint="?attr/colorPrimaryDark"
         app:miniFabTitleTextColor="?attr/colorPrimaryDark" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_location_reload"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_refresh" />
 
 </RelativeLayout>
 

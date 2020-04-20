@@ -1,6 +1,7 @@
 package github.abnvanand.washeteria.ui.events;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -33,6 +34,10 @@ public class ViewSlotsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         String locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
+        if (TextUtils.isEmpty(locationId)) {
+            Toast.makeText(this, "You must select a location first", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
