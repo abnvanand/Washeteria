@@ -7,8 +7,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,7 +36,7 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener {
+        implements AdapterView.OnItemClickListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemSelectedListener {
 
     public static final String EXTRA_SELECTED_LOCATION_ID = "EXTRA_CURR_LOC_ID";
     public static final String EXTRA_SELECTED_MACHINE_ID = "EXTRA_SELECTED_MACHINE";
@@ -62,7 +64,8 @@ public class MainActivity extends AppCompatActivity
 
     private void setupListeners() {
         binding.fabSpeedDial.setMenuListener(this);
-        binding.locationWidget.locationSelector.setOnItemClickListener(this);
+//        binding.locationWidget.locationSelector.setOnItemClickListener(this);
+        binding.locationWidget.locationSelector.setOnItemSelectedListener(this);
         binding.contentMain.pullToRefresh.setOnRefreshListener(this);
     }
 
@@ -89,7 +92,12 @@ public class MainActivity extends AppCompatActivity
                 .get(MainViewModel.class);
 
         mViewModel.getLocationListObservable().observe(this,
-                this::fillLocations);
+                new Observer<List<Location>>() {
+                    @Override
+                    public void onChanged(List<Location> locations) {
+                        MainActivity.this.fillLocations(locations);
+                    }
+                });
 
         mViewModel.getMachinesListObservable().observe(this,
                 machineEntities -> {
@@ -157,6 +165,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // On selecting a spinner item
+        currentLocation = (Location) parent.getItemAtPosition(position);
+        Timber.d("onItemSelected location: %s", currentLocation);
+        mViewModel.getData(currentLocation.getId());
+        binding.contentMain.pullToRefresh.setRefreshing(true);
+    }
+
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+
+    @Override
     public boolean onPrepareMenu(NavigationMenu navigationMenu) {
         // TODO: Do something with yout menu items, or return false if you don't want to show them
         return true;
@@ -164,8 +188,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onMenuItemSelected(MenuItem item) {
+        if (currentLocation == null) {
+            Toast.makeText(this, "You must select a location.", Toast.LENGTH_SHORT)
+                    .show();
+            return true;
+        }
+
         int id = item.getItemId();
         if (id == R.id.action_calendar) {
+
             Intent intent = new Intent(MainActivity.this, ViewSlotsActivity.class);
             intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
             startActivity(intent);
