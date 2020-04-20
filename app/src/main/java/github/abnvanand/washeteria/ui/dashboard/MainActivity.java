@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(binding.toolbarInclude.toolbar);
 
+        mViewModel = new ViewModelProvider(this)
+                .get(MainViewModel.class);
+
         setupListeners();
         initRecyclerView(binding.contentMain.recyclerView);
         initViewModel();
@@ -71,6 +74,13 @@ public class MainActivity extends AppCompatActivity
 //        binding.locationWidget.locationSelector.setOnItemClickListener(this);
         binding.locationWidget.locationSelector.setOnItemSelectedListener(this);
         binding.contentMain.pullToRefresh.setOnRefreshListener(this);
+
+        binding.btnLocationReload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.refreshLocations();
+            }
+        });
     }
 
     private void initRecyclerView(RecyclerView mRecyclerView) {
@@ -92,8 +102,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initViewModel() {
-        mViewModel = new ViewModelProvider(this)
-                .get(MainViewModel.class);
 
         mViewModel.getLocationListObservable().observe(this, new Observer<Resource<List<Location>>>() {
             @Override
