@@ -6,6 +6,7 @@ import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.AssistedReservation;
 import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -38,4 +39,8 @@ public interface WebService {
     @GET("events/modified/{modifiedAfter}")
     Call<List<Event>> getEventsAfter(@Path("modifiedAfter") String modifiedAtfer);
 //    Call<List<Event>> getEventsAfter(@Query("modifiedAfter") Long modifiedAfter);
+
+    @POST("events/assisted")
+    Call<Event> createAssistedEvent(@Body AssistedReservation assistedReservation);
+
 }

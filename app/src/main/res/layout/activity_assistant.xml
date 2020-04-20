@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -18,6 +17,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:paddingTop="16dp"
@@ -32,29 +32,95 @@
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/dayButtonGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:selectionRequired="true"
                 app:singleSelection="true">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/allDays"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="All days" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/weekDays"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Weekdays" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/weekEnds"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Weekends" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/dayChipGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMon"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="monday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTue"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="tuesday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipWed"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="wednesday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipThu"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="thursday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFri"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="friday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSat"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="saturday" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSun"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="sunday" />
+
+
+            </com.google.android.material.chip.ChipGroup>
+
 
             <TextView
                 android:layout_width="wrap_content"
@@ -64,113 +130,63 @@
                 android:text="Select time"
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Morning" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Afternoon" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Evening" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Night" />
-
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp"
-                android:text="Select time icon version"
-                android:textAppearance="?attr/textAppearanceSubtitle1" />
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/icon_only_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="Icon Morning"
-                    android:minWidth="@dimen/mtrl_min_touch_target_size"
-                    app:icon="@drawable/ic_signin"
-                    app:iconPadding="0dp" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="Icon Afternoon"
-                    android:minWidth="@dimen/mtrl_min_touch_target_size"
-                    app:icon="@drawable/ic_calendar"
-                    app:iconPadding="0dp" />
-
-                <Button
-                    android:id="@+id/material_icon_button"
-                    style="@style/Widget.MaterialComponents.Button.Icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="CAL"
-                    app:icon="@drawable/ic_calendar" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="Icon evening"
-                    android:minWidth="@dimen/mtrl_min_touch_target_size"
-                    app:icon="@drawable/ic_signin"
-                    app:iconPadding="0dp" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="Icon night"
-                    android:minWidth="@dimen/mtrl_min_touch_target_size"
-                    app:icon="@drawable/ic_calendar"
-                    app:iconPadding="0dp" />
-
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <!-- Reflow chip group. -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Individual day selection" />
-
             <com.google.android.material.chip.ChipGroup
-                android:id="@+id/reflow_group"
-                android:layout_width="match_parent"
+                android:id="@+id/timeChipGroup"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp" />
+                android:layout_margin="16dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMorning"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Morning 6am-10am" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAfternoon"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Afternoon 10am-4pm" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipEvening"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Evening 4pm-8pm" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipNight"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Night 8pm-12am" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <Button
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom time"
+                android:visibility="gone" />
+
 
             <TimePicker
-                android:id="@+id/time_picker"
+                android:id="@+id/start_time_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:timePickerMode="spinner" />
+                android:timePickerMode="spinner"
+                android:visibility="gone" />
+
+            <TimePicker
+                android:id="@+id/end_time_picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:timePickerMode="spinner"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -180,66 +196,14 @@
                 android:text="Duration"
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:singleSelection="true">
 
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="15 min" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="30 min" />
-
-                <Button
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="50 min" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
-
-                <TextView
-                    android:id="@+id/value_start"
-                    android:layout_width="48dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="1" />
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/range_slider"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1"
-                    android:stepSize="1"
-                    android:valueFrom="1"
-                    android:valueTo="50" />
-
-                <TextView
-                    android:id="@+id/value_end"
-                    android:layout_width="48dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:text="50" />
-            </LinearLayout>
+            <include
+                android:id="@+id/durationSlider"
+                layout="@layout/widget_duration_range" />
 
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_toggle"
+                android:id="@+id/switch_consent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="@dimen/activity_vertical_margin"
@@ -247,27 +211,114 @@
                 android:checked="false"
                 android:enabled="true"
                 android:text="Reserve a slot even if none of the selections match."
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                tools:checked="true" />
 
-            <LinearLayout
+
+            <ProgressBar
+                android:id="@+id/loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnReserve"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnCancel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Cancel" />
-
-                <Button
-                    android:id="@+id/btnConfirm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Confirm" />
-            </LinearLayout>
+                android:layout_weight="1"
+                android:text="Reserve" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
+
+
+    <!--                <com.google.android.material.button.MaterialButtonToggleGroup-->
+    <!--                    android:layout_width="wrap_content"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    app:singleSelection="true">-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:text="15 min" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:text="30 min" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:text="50 min" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:text="Custom" />-->
+    <!--                    -->
+    <!--                </com.google.android.material.button.MaterialButtonToggleGroup>-->
+
+
+    <!--                <TextView-->
+    <!--                    android:layout_width="wrap_content"-->
+    <!--                    android:layout_height="wrap_content"-->
+    <!--                    android:paddingTop="16dp"-->
+    <!--                    android:paddingBottom="8dp"-->
+    <!--                    android:text="Select time icon version"-->
+    <!--                    android:textAppearance="?attr/textAppearanceSubtitle1" />-->
+
+    <!--                <com.google.android.material.button.MaterialButtonToggleGroup-->
+    <!--                    android:id="@+id/icon_only_group"-->
+    <!--                    android:layout_width="wrap_content"-->
+    <!--                    android:layout_height="wrap_content">-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:contentDescription="Icon Morning"-->
+    <!--                        android:minWidth="@dimen/mtrl_min_touch_target_size"-->
+    <!--                        app:icon="@drawable/ic_signin"-->
+    <!--                        app:iconPadding="0dp" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:contentDescription="Icon Afternoon"-->
+    <!--                        android:minWidth="@dimen/mtrl_min_touch_target_size"-->
+    <!--                        app:icon="@drawable/ic_calendar"-->
+    <!--                        app:iconPadding="0dp" />-->
+
+    <!--                    <Button-->
+    <!--                        android:id="@+id/material_icon_button"-->
+    <!--                        style="@style/Widget.MaterialComponents.Button.Icon"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:text="CAL"-->
+    <!--                        app:icon="@drawable/ic_calendar" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:contentDescription="Icon evening"-->
+    <!--                        android:minWidth="@dimen/mtrl_min_touch_target_size"-->
+    <!--                        app:icon="@drawable/ic_signin"-->
+    <!--                        app:iconPadding="0dp" />-->
+
+    <!--                    <Button-->
+    <!--                        style="?attr/materialButtonOutlinedStyle"-->
+    <!--                        android:layout_width="wrap_content"-->
+    <!--                        android:layout_height="wrap_content"-->
+    <!--                        android:contentDescription="Icon night"-->
+    <!--                        android:minWidth="@dimen/mtrl_min_touch_target_size"-->
+    <!--                        app:icon="@drawable/ic_calendar"-->
+    <!--                        app:iconPadding="0dp" />-->
+
+    <!--                </com.google.android.material.button.MaterialButtonToggleGroup>-->
