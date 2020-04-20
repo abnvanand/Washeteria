@@ -9,10 +9,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.models.Machine;
+import timber.log.Timber;
 
 public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomViewHolder> {
 
@@ -32,13 +37,13 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomVi
 
         public final View mView;
         TextView machineName;
-        TextView machineStatus;
+        TextView nextAvailableAt;
 
         public CustomViewHolder(@NonNull View itemView) {
             super(itemView);
             mView = itemView;
             machineName = mView.findViewById(R.id.textViewMachineName);
-            machineStatus = mView.findViewById(R.id.textViewMachineStatus);
+            nextAvailableAt = mView.findViewById(R.id.textViewMachineStatus);
         }
     }
 
@@ -53,7 +58,21 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.CustomVi
     @Override
     public void onBindViewHolder(@NonNull MachineAdapter.CustomViewHolder holder, int position) {
         holder.machineName.setText(dataList.get(position).getName());
-        holder.machineStatus.setText(dataList.get(position).getStatus());
+        long nextAvailableAtMillis = dataList.get(position).getNextAvailableAtMillis();
+        Timber.d("nextAvailableAtMillis: %s , instant now %s",
+                nextAvailableAtMillis,
+                Instant.now().toEpochMilli());
+        Timber.d("nextAvailableAtMillis:< instant now %s",
+                nextAvailableAtMillis <
+                        Instant.now().toEpochMilli());
+        if (nextAvailableAtMillis == 0
+                || nextAvailableAtMillis < Instant.now().toEpochMilli()) {
+            holder.nextAvailableAt.setText("NOW");
+        } else {
+            Date date = new Date(nextAvailableAtMillis);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM hh:mm a", Locale.getDefault());
+            holder.nextAvailableAt.setText(sdf.format(date));
+        }
     }
 
     @Override

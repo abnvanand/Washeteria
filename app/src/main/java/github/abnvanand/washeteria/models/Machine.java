@@ -23,8 +23,8 @@ public class Machine {
     @SerializedName("status")
     private String status;  // Vacant / Occupied / Malfunctioned
 
-    @SerializedName("nextAvailableAt")
-    private String remainingTime; // Set if status == Occupied
+    @SerializedName("nextAvaiableAt")
+    private Long nextAvailableAt;
     // TODO: Add a list of events of this machine
 
     @Ignore
@@ -32,12 +32,13 @@ public class Machine {
 
     }
 
-    public Machine(String id, String name, String locationId, String status, String remainingTime) {
+    public Machine(@NonNull String id, String name, @NonNull String locationId,
+                   String status, Long nextAvailableAt) {
         this.id = id;
         this.name = name;
         this.locationId = locationId;
         this.status = status;
-        this.remainingTime = remainingTime;
+        this.nextAvailableAt = nextAvailableAt;
     }
 
     public String getId() {
@@ -68,12 +69,16 @@ public class Machine {
         this.status = status;
     }
 
-    public String getRemainingTime() {
-        return remainingTime;
+    public Long getNextAvailableAt() {
+        return nextAvailableAt;
     }
 
-    public void setRemainingTime(String remainingTime) {
-        this.remainingTime = remainingTime;
+    public Long getNextAvailableAtMillis() {
+        return nextAvailableAt * 1000;
+    }
+
+    public void setNextAvailableAt(Long nextAvailableAt) {
+        this.nextAvailableAt = nextAvailableAt;
     }
 
     public void setName(String name) {
@@ -87,7 +92,7 @@ public class Machine {
                 ", name='" + name + '\'' +
                 ", locationId='" + locationId + '\'' +
                 ", status='" + status + '\'' +
-                ", remainingTime='" + remainingTime + '\'' +
+                ", remainingTime='" + nextAvailableAt + '\'' +
                 '}';
     }
 }
