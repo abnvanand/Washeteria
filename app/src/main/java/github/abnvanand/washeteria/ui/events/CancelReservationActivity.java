@@ -4,34 +4,28 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.database.AppDatabase;
+import github.abnvanand.washeteria.databinding.ActivityCancelReservationBinding;
 import github.abnvanand.washeteria.models.Event;
+import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
-import github.abnvanand.washeteria.shareprefs.SessionManager;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
+import github.abnvanand.washeteria.utils.Constants;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,28 +36,37 @@ import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXT
 
 public class CancelReservationActivity extends AppCompatActivity {
     Executor executor = Executors.newSingleThreadExecutor();
-    String token;
+    //    String token;
     Event eventToCancel;
     LoginViewModel loginViewModel;
     LoggedInStatus mLoggedInStatus;
-    private View rootView;
+
+    private Snackbar loginSnackbar;
+    private ActivityCancelReservationBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cancel_reservation);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityCancelReservationBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        rootView = findViewById(R.id.rootView);
+        setSupportActionBar(binding.toolbarInclude.toolbar);
+
         String eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
 
-        TextView machineNameTV = findViewById(R.id.machineName);
-        EditText startsAtEditText = findViewById(R.id.startsAtDate);
-        EditText endsAtEditText = findViewById(R.id.endsAtDate);
-        Button btnCancelEvent = findViewById(R.id.btnCancelEvent);
-
         initViewModel();
+
+        loginSnackbar = Snackbar
+                .make(binding.getRoot(),
+                        "You must login to perform this action.",
+                        Snackbar.LENGTH_LONG)
+                .setAction("LOGIN", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(CancelReservationActivity.this,
+                                LoginActivity.class));
+                    }
+                });
 
 
         executor.execute(new Runnable() {
@@ -72,103 +75,117 @@ public class CancelReservationActivity extends AppCompatActivity {
                 AppDatabase mdb = AppDatabase.getInstance(CancelReservationActivity.this);
 
                 eventToCancel = mdb.eventDao().getEventById(eventId);
-                if (eventToCancel == null)
-                    Timber.wtf("eventToCancel for id %s does not exist", eventId);
-                else
-                    Timber.d("eventToCancel %s", eventToCancel);
-
-                String machineId = eventToCancel.getMachineId();
-                String locationId = eventToCancel.getLocationId();
-                String creator = eventToCancel.getCreator();
-                Long startsAt = eventToCancel.getStartsAt();
-                Long endsAt = eventToCancel.getEndsAt();
-                SessionManager sessionManager = new SessionManager(CancelReservationActivity.this);
-                token = sessionManager.getToken();
-
-
-                Machine machineById = mdb.machineDao().getMachineById(machineId);
-                mdb.locationDao().getLocationById(locationId);
-
-                machineNameTV.setText(machineById.getName());
-
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault());
-                startsAtEditText.setText(dateFormat.format(new Date(eventToCancel.getStartsAtMillis())));
-                endsAtEditText.setText(dateFormat.format(new Date(eventToCancel.getEndsAtMillis())));
-            }
-        });
-
-
-        btnCancelEvent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get authInstance from Retrofit singleton
-                // and send PUT request with event.cancelled = true;
-                if (TextUtils.isEmpty(token))
-                    Timber.wtf("Token can't be empty");
-
                 if (eventToCancel == null) {
-                    Timber.wtf("EventToCancel can't be null");
+                    Timber.wtf("eventToCancel for id %s does not exist in local db", eventId);
+                    return;
                 }
 
-                eventToCancel.setCancelled(true);
+                Timber.d("eventToCancel %s", eventToCancel);
+                // cancel button is available only if the event is not yet cancelled
+                binding.btnCancelEvent.setEnabled(!eventToCancel.isCancelled());
+
+                Machine machineById = mdb.machineDao().getMachineById(eventToCancel.getMachineId());
+                Location locationById = mdb.locationDao().getLocationById(eventToCancel.getLocationId());
+
+                binding.eventDetails.machineName.setText(machineById.getName());
+                binding.eventDetails.locationName.setText(locationById.getName());
+
+                binding.eventDetails
+                        .startsAtWidget
+                        .eventDate.setText(Constants.dateFormat.format(eventToCancel.getStartsAtMillis()));
+                binding.eventDetails
+                        .startsAtWidget
+                        .eventTime.setText(Constants.timeFormat.format(eventToCancel.getStartsAtMillis()));
+
+                binding.eventDetails
+                        .endsAtWidget
+                        .eventDate.setText(Constants.dateFormat.format(eventToCancel.getEndsAtMillis()));
+                binding.eventDetails
+                        .endsAtWidget
+                        .eventTime.setText(Constants.timeFormat.format(eventToCancel.getEndsAtMillis()));
 
 
-                Retrofit authorizedInstance = RetrofitSingleton.getAuthorizedInstance(token);
-                WebService webService = authorizedInstance.create(WebService.class);
-                webService.cancelEvent(eventToCancel).enqueue(new Callback<Event>() {
-                    @Override
-                    public void onResponse(Call<Event> call, Response<Event> response) {
-                        if (!response.isSuccessful()) {
-                            if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                                loginViewModel.logout();
-                                Snackbar
-                                        .make(rootView,
-                                                "Token has expired. Please login again",
-                                                Snackbar.LENGTH_LONG)
-                                        .setAction("LOGIN", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                startActivity(new Intent(CancelReservationActivity.this, LoginActivity.class));
-                                            }
-                                        }).show();
-                                return;
-                            } else {
-
-                                Toast.makeText(CancelReservationActivity.this,
-                                        "Err: " + (!TextUtils.isEmpty(response.message()) ? response.message() : response.code()),
-                                        Toast.LENGTH_SHORT)
-                                        .show();
-                            }
-
-                            setResult(RESULT_CANCELED);
-                            return;
-                        }
-
-                        Event body = response.body();
-                        if (body == null) {
-                            Timber.wtf("events cancel API response body MUST NOT be empty");
-                            return;
-                        }
-
-                        Toast.makeText(CancelReservationActivity.this,
-                                "Cancelled event: " + body.getId(),
-                                Toast.LENGTH_SHORT)
-                                .show();
-
-                        setResult(RESULT_OK);
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(Call<Event> call, Throwable t) {
-                        Toast.makeText(CancelReservationActivity.this,
-                                "Error: " + t.getLocalizedMessage(),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    }
-                });
             }
         });
+
+
+        binding.btnCancelEvent.setOnClickListener(v -> {
+            if (mLoggedInStatus == null || !mLoggedInStatus.isLoggedIn() || mLoggedInStatus.getUser() == null) {
+                loginSnackbar
+                        .setText("You must be logged in to reserve a slot.")
+                        .show();
+                return;
+            }
+
+            if (eventToCancel == null) {
+                Timber.wtf("EventToCancel can't be null");
+                Toast.makeText(CancelReservationActivity.this,
+                        "This event cannot be cancelled! NULL",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            eventToCancel.setCancelled(true);
+
+            sendAPIRequest(mLoggedInStatus.getUser().getToken());
+        });
+    }
+
+    private void sendAPIRequest(String token) {
+        binding.loading.setVisibility(View.VISIBLE);
+        Retrofit authorizedInstance = RetrofitSingleton.getAuthorizedInstance(token);
+        WebService webService = authorizedInstance.create(WebService.class);
+        webService.cancelEvent(eventToCancel).enqueue(new Callback<Event>() {
+            @Override
+            public void onResponse(Call<Event> call, Response<Event> response) {
+                binding.loading.setVisibility(View.INVISIBLE);
+
+                if (!response.isSuccessful()) {
+                    handleUnsuccessfulResponse(response);
+                    return;
+                }
+
+                Event body = response.body();
+                if (body == null)
+                    Timber.wtf("Event cancel response code is %s but body is null",
+                            response.code());
+
+                Toast.makeText(CancelReservationActivity.this,
+                        "Cancelled event: " + eventToCancel.getId(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<Event> call, Throwable t) {
+                binding.loading.setVisibility(View.INVISIBLE);
+
+                Toast.makeText(CancelReservationActivity.this,
+                        "Error: " + t.getLocalizedMessage(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+    }
+
+    private void handleUnsuccessfulResponse(Response<Event> response) {
+        switch (response.code()) {
+            case HttpURLConnection.HTTP_UNAUTHORIZED:
+                loginViewModel.logout();
+                loginSnackbar
+                        .setText("Token has expired. Please login again")
+                        .show();
+                break;
+            default:
+                Toast.makeText(CancelReservationActivity.this,
+                        "Err: " + (!TextUtils.isEmpty(response.message()) ? response.message() : response.code()),
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+        }
     }
 
     private void initViewModel() {
@@ -178,12 +195,6 @@ public class CancelReservationActivity extends AppCompatActivity {
         loginViewModel.getLoggedInStatusObservable()
                 .observe(this, loggedInStatus -> {
                     mLoggedInStatus = loggedInStatus;
-                    if (mLoggedInStatus != null
-                            && mLoggedInStatus.isLoggedIn()
-                            && mLoggedInStatus.getUser() != null) {
-                        token = mLoggedInStatus.getUser().getToken();
-                    }
                 });
-
     }
 }

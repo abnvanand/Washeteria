@@ -5,10 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.events.ReserveSlotActivity">
+    tools:context=".ui.events.CancelReservationActivity">
 
-    <include layout="@layout/view_toolbar" />
-
+    <include
+        android:id="@+id/toolbarInclude"
+        layout="@layout/view_toolbar" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,90 +17,23 @@
         android:layout_margin="@dimen/activity_vertical_margin"
         android:orientation="vertical">
 
+        <include
+            android:id="@+id/eventDetails"
+            layout="@layout/content_event_details" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Machine"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <TextView
-                android:id="@+id/machineName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorPrimaryDark"
-                tools:text="OBH1" />
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Starts At"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:orientation="horizontal">
-
-
-            <EditText
-                android:id="@+id/startsAtDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="false"
-                android:focusable="false"
-                android:longClickable="false" />
-
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ends At"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:orientation="horizontal">
-
-
-            <EditText
-                android:id="@+id/endsAtDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="false"
-                android:focusable="false"
-                android:longClickable="false" />
-
-        </LinearLayout>
-
+            android:layout_gravity="center"
+            android:visibility="invisible" />
 
         <Button
             android:id="@+id/btnCancelEvent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:enabled="true"
             android:text="Cancel Reservation" />
 
     </LinearLayout>
-
 </LinearLayout>
