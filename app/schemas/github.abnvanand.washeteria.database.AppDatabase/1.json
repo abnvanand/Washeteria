@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9ab790fcb7253161cad97f1430fe1136",
+    "identityHash": "92b8dc4a87ca47accf492192467a843d",
     "entities": [
       {
         "tableName": "machines",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT, `locationId` TEXT NOT NULL, `status` TEXT, `remainingTime` TEXT, PRIMARY KEY(`id`, `locationId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT, `locationId` TEXT NOT NULL, `status` TEXT, `nextAvailableAt` INTEGER, PRIMARY KEY(`id`, `locationId`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -33,9 +33,9 @@
             "notNull": false
           },
           {
-            "fieldPath": "remainingTime",
-            "columnName": "remainingTime",
-            "affinity": "TEXT",
+            "fieldPath": "nextAvailableAt",
+            "columnName": "nextAvailableAt",
+            "affinity": "INTEGER",
             "notNull": false
           }
         ],
@@ -141,7 +141,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ab790fcb7253161cad97f1430fe1136')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '92b8dc4a87ca47accf492192467a843d')"
     ]
   }
 }
