@@ -75,12 +75,7 @@ public class MainActivity extends AppCompatActivity
         binding.locationWidget.locationSelector.setOnItemSelectedListener(this);
         binding.contentMain.pullToRefresh.setOnRefreshListener(this);
 
-        binding.btnLocationReload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.refreshLocations();
-            }
-        });
+        binding.locationWidget.btnReload.setOnClickListener(v -> mViewModel.refreshLocations());
     }
 
     private void initRecyclerView(RecyclerView mRecyclerView) {
@@ -139,19 +134,18 @@ public class MainActivity extends AppCompatActivity
             binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.RED));
             binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.RED));
             binding.locationProgress.setIndeterminate(false);
-            binding.btnLocationReload.setVisibility(View.VISIBLE);
+            binding.locationWidget.btnReload.setVisibility(View.VISIBLE);
         } else if (status == Status.SUCCESS) {
             binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
             binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
             binding.locationProgress.setIndeterminate(false);
             binding.locationProgress.setProgress(100);
-            binding.btnLocationReload.setVisibility(View.VISIBLE);
         } else if (status == Status.LOADING) {
             binding.locationProgress.setIndeterminate(true);
             binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
             binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
             binding.locationProgress.setIndeterminateTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
-            binding.btnLocationReload.setVisibility(View.INVISIBLE);
+            binding.locationWidget.btnReload.setVisibility(View.GONE);
         }
     }
 
