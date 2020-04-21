@@ -47,13 +47,10 @@ import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXT
 import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_MACHINE_ID;
 
 public class ReserveSlotActivity extends AppCompatActivity {
-    private ActivityReserveSlotBinding binding;
-
+    private static final String durationValueFormat = "%.0f";
     SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
-
-
-    private static final String durationValueFormat = "%.0f";
+    private ActivityReserveSlotBinding binding;
     private LoginViewModel loginViewModel;
 
     private Executor executor = Executors.newSingleThreadExecutor();
@@ -80,8 +77,10 @@ public class ReserveSlotActivity extends AppCompatActivity {
         String machineId = getIntent().getStringExtra(EXTRA_MACHINE_ID);
         long millis = getIntent().getLongExtra(EXTRA_CLICKED_MILLIS, -1);
 
-        if (millis == -1)
+        if (millis == -1) {
             Timber.wtf("Millis can't be empty");
+            millis = new Date().getTime();
+        }
 
 
         binding.durationSlider.setValueFrom(Constants.MIN_DURATION);
@@ -133,6 +132,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
         binding.startsAtWidget.btnEditStartsAt.setOnClickListener(btnEditStartTime);
 
         View.OnClickListener btnSubmitClickListener = v -> {
+            binding.loading.setVisibility(View.VISIBLE);
+
             EventCreateBody eventCreateBody =
                     new EventCreateBody(
                             machine.getId(),
@@ -143,63 +144,79 @@ public class ReserveSlotActivity extends AppCompatActivity {
                             username
                     );
 
-            WebService webService = RetrofitSingleton.getAuthorizedInstance(token)
-                    .create(WebService.class);
-
-            webService.createEvent(eventCreateBody).enqueue(new Callback<Event>() {
-                @Override
-                public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
-                    if (!response.isSuccessful()) {
-                        if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                            loginViewModel.logout();
-                            Snackbar.make(
-                                    binding.getRoot(),
-                                    "Token has expired. Please login again",
-                                    Snackbar.LENGTH_LONG)
-                                    .setAction("LOGIN",
-                                            v1 -> startActivity(
-                                                    new Intent(ReserveSlotActivity.this,
-                                                            LoginActivity.class)))
-                                    .show();
-                            return;
-                        } else {
-                            Toast.makeText(ReserveSlotActivity.this,
-                                    "Err: " +
-                                            (!TextUtils.isEmpty(response.message()) ?
-                                                    response.message() :
-                                                    response.code()),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                        setResult(RESULT_CANCELED);
-                        return;
-                    }
-
-                    Event body = response.body();
-
-                    if (body == null) {
-                        Timber.wtf("event create API response body MUST NOT be empty");
-                    } else {
-                        Toast.makeText(ReserveSlotActivity.this,
-                                "Created event: " + body.getId(),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    }
-
-                    setResult(RESULT_OK);
-                    finish();
-                }
-
-                @Override
-                public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
-                    Toast.makeText(ReserveSlotActivity.this,
-                            "Error: " + t.getLocalizedMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
-            });
+            sendAPIRequest(eventCreateBody);
         };
 
         binding.btnReserveSlot.setOnClickListener(btnSubmitClickListener);
+    }
+
+    private void sendAPIRequest(EventCreateBody eventCreateBody) {
+        WebService webService = RetrofitSingleton.getAuthorizedInstance(token)
+                .create(WebService.class);
+
+        webService.createEvent(eventCreateBody).enqueue(new Callback<Event>() {
+            @Override
+            public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
+                binding.loading.setVisibility(View.INVISIBLE);
+
+                if (!response.isSuccessful()) {
+                    handleUnsuccessfulResponse(response);
+                    return;
+                }
+
+                Event body = response.body();
+
+                if (body == null) {
+                    Timber.wtf("Event create response %s but body is null", response.code());
+                    Toast.makeText(ReserveSlotActivity.this,
+                            "Could not find any free slot. Try later or use manual reservation",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Toast.makeText(ReserveSlotActivity.this,
+                        "Created event: " + body.getId(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
+                binding.loading.setVisibility(View.INVISIBLE);
+
+                Toast.makeText(ReserveSlotActivity.this,
+                        "Error: " + t.getLocalizedMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void handleUnsuccessfulResponse(Response<Event> response) {
+        switch (response.code()) {
+            case HttpURLConnection.HTTP_UNAUTHORIZED:
+                loginViewModel.logout();
+                Snackbar.make(
+                        binding.getRoot(),
+                        "Token has expired. Please login again",
+                        Snackbar.LENGTH_LONG)
+                        .setAction("LOGIN",
+                                v1 -> startActivity(
+                                        new Intent(ReserveSlotActivity.this,
+                                                LoginActivity.class)))
+                        .show();
+                break;
+            default:
+                Toast.makeText(ReserveSlotActivity.this,
+                        "Err: " +
+                                (!TextUtils.isEmpty(response.message()) ?
+                                        response.message() :
+                                        response.code()),
+                        Toast.LENGTH_SHORT).show();
+
+        }
     }
 
     private void initViewModel() {
