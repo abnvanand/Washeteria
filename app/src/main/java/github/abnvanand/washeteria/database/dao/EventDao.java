@@ -30,6 +30,9 @@ public interface EventDao {
     @Query("SELECT * FROM events WHERE machineId=:machineId")
     List<Event> getAllByMachineId(String machineId);
 
+    @Query("SELECT * FROM events WHERE machineId=:machineId AND cancelled=0")
+    List<Event> getNonCancelledByMachineId(String machineId);
+
     @Query("SELECT * FROM events")
     List<Event> getAll();
 

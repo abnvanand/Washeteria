@@ -297,7 +297,7 @@ public class AppRepository {
 
     private void loadEventsByMachineFromDb(String machineId) {
         executor.execute(() -> {
-            List<Event> queryResults = mDb.eventDao().getAllByMachineId(machineId);
+            List<Event> queryResults = mDb.eventDao().getNonCancelledByMachineId(machineId);
             eventsByMachineObservable.postValue(queryResults);
         });
     }
