@@ -131,7 +131,7 @@ public class AssistantActivity extends AppCompatActivity {
 
                         Event body = response.body();
                         if (body == null) {
-                            Timber.wtf("Event create response %s but body is null", response.code());
+                            Timber.wtf("Event create response code is: %s but body is null", response.code());
                             Toast.makeText(AssistantActivity.this,
                                     "Could not find any free slot. Try later or use manual reservation",
                                     Toast.LENGTH_SHORT).show();
