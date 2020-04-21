@@ -143,8 +143,11 @@ public class AssistantActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<Event> call, Throwable t) {
+                    public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
                         binding.loading.setVisibility(View.INVISIBLE);
+                        Toast.makeText(AssistantActivity.this,
+                                "Err: " + t.getLocalizedMessage(),
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
