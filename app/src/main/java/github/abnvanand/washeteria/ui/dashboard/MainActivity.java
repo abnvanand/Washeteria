@@ -232,12 +232,13 @@ public class MainActivity extends AppCompatActivity
 
         int id = item.getItemId();
         if (id == R.id.action_calendar) {
-
             Intent intent = new Intent(MainActivity.this, ViewSlotsActivity.class);
             intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
             startActivity(intent);
         } else if (R.id.action_assistant == id) {
-            startActivity(new Intent(this, AssistantActivity.class));
+            Intent intent = new Intent(this, AssistantActivity.class);
+            intent.putExtra(EXTRA_SELECTED_LOCATION_ID, currentLocation.getId());
+            startActivity(intent);
         }
         return false;
     }
