@@ -8,10 +8,17 @@ public class Resource<T> {
     private T data;
     private String msg;
 
-    public Resource(){
+    public Resource() {
 
     }
 
+
+    private Resource(@NonNull Status status, @Nullable T data, @Nullable String msg) {
+        this.status = status;
+        if (data != null)
+            this.data = data;
+        this.msg = msg;
+    }
 
     public Status getStatus() {
         return status;
@@ -34,12 +41,6 @@ public class Resource<T> {
     }
 
     public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    private Resource(@NonNull Status status, @Nullable T data, @Nullable String msg) {
-        this.status = status;
-        this.data = data;
         this.msg = msg;
     }
 
