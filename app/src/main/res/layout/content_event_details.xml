@@ -7,11 +7,6 @@
     android:orientation="vertical"
     tools:context=".ui.events.ReserveSlotActivity">
 
-    <include
-        android:id="@+id/toolbarInclude"
-        layout="@layout/view_toolbar" />
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -81,7 +76,7 @@
 
         <include
             android:id="@+id/startsAtWidget"
-            layout="@layout/widget_date_editable" />
+            layout="@layout/widget_date" />
 
         <TextView
             android:layout_width="match_parent"
@@ -92,50 +87,6 @@
         <include
             android:id="@+id/endsAtWidget"
             layout="@layout/widget_date" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select duration" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-
-            <com.google.android.material.slider.Slider
-                android:id="@+id/durationSlider"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:stepSize="1"
-                android:valueFrom="1"
-                android:valueTo="60" />
-
-            <TextView
-                android:id="@+id/durationSliderValue"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                tools:text="30" />
-        </LinearLayout>
-
-
-        <ProgressBar
-            android:id="@+id/loading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="invisible"
-            tools:visibility="visible" />
-
-        <Button
-            android:id="@+id/btnReserveSlot"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:enabled="false"
-            android:text="Reserve Slot" />
 
     </LinearLayout>
 
