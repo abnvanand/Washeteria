@@ -6,18 +6,18 @@ import androidx.annotation.Nullable;
 public class Resource<T> {
     private Status status;
     private T data;
-    private String msg;
+    private APIError error;
 
     public Resource() {
 
     }
 
 
-    private Resource(@NonNull Status status, @Nullable T data, @Nullable String msg) {
+    public Resource(@NonNull Status status, @Nullable T data, @Nullable APIError error) {
         this.status = status;
         if (data != null)
             this.data = data;
-        this.msg = msg;
+        this.error = error;
     }
 
     public Status getStatus() {
@@ -36,20 +36,20 @@ public class Resource<T> {
         this.data = data;
     }
 
-    public String getMsg() {
-        return msg;
+    public APIError getError() {
+        return error;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setError(APIError error) {
+        this.error = error;
     }
 
     public Resource<T> success(T data) {
         return new Resource<>(Status.SUCCESS, data, null);
     }
 
-    public Resource<T> error(String msg, T data) {
-        return new Resource<>(Status.ERROR, data, msg);
+    public Resource<T> error(APIError error, T data) {
+        return new Resource<>(Status.ERROR, data, error);
     }
 
     public Resource<T> loading(T data) {

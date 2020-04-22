@@ -15,27 +15,26 @@ import github.abnvanand.washeteria.database.AppDatabase;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.models.pojo.Resource;
 import github.abnvanand.washeteria.models.pojo.Status;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
+import github.abnvanand.washeteria.utils.ErrorUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
 public class AppRepository {
+    private static final String REFRESH_EVENTS_BY_LOCATION_OBSERVERS = "REFRESH_EVENTS_BY_LOC";
+    private static final String REFRESH_EVENTS_BY_MACHINE_OBSERVERS = "REFRESH_EVENTS_BY_MACHINE";
     private static AppRepository instance;// TODO: Make volatile maybe?
     //    public MutableLiveData<List<Machine>> machines;
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
     private MutableLiveData<Resource<List<Location>>> locationListObservable = new MutableLiveData<Resource<List<Location>>>();
     private MutableLiveData<List<Event>> eventsByLocationObservable = new MutableLiveData<>();
     private MutableLiveData<List<Event>> eventsByMachineObservable = new MutableLiveData<>();
-
-    private static final String REFRESH_EVENTS_BY_LOCATION_OBSERVERS = "REFRESH_EVENTS_BY_LOC";
-    private static final String REFRESH_EVENTS_BY_MACHINE_OBSERVERS = "REFRESH_EVENTS_BY_MACHINE";
-
-
     private AppDatabase mDb;
     private WebService webService;
 
@@ -49,13 +48,6 @@ public class AppRepository {
     private Executor executor = Executors.newSingleThreadExecutor();
 
 
-    public static AppRepository getInstance(Context context) {
-        if (instance == null) {
-            instance = new AppRepository(context);
-        }
-        return instance;
-    }
-
     private AppRepository(Context context) {
         mDb = AppDatabase.getInstance(context);
         webService = RetrofitSingleton
@@ -63,6 +55,12 @@ public class AppRepository {
                 .create(WebService.class);
     }
 
+    public static AppRepository getInstance(Context context) {
+        if (instance == null) {
+            instance = new AppRepository(context);
+        }
+        return instance;
+    }
 
     public void fetchMachinesByLocation(String locationId) {
         loadMachinesByLocationIdFromDb(locationId);
@@ -77,13 +75,16 @@ public class AppRepository {
                     public void onResponse(@NotNull Call<List<Machine>> call,
                                            @NotNull Response<List<Machine>> response) {
                         if (!response.isSuccessful()) {
-                            showError(response.message());
+                            handleUnsuccessfulResponse(ErrorUtils.parseError(response,
+                                    RetrofitSingleton.errorConverter));
+                        }
+
+                        if (response.body() == null) {
+                            Timber.d("Response code: %s but response body is null", response.code());
                             return;
                         }
 
-                        if (response.body() != null) {
-                            addMachinesToDb(response.body(), locationId);
-                        }
+                        addMachinesToDb(response.body(), locationId);
                     }
 
                     @Override
@@ -132,10 +133,15 @@ public class AppRepository {
                     public void onResponse(@NotNull Call<List<Location>> call,
                                            @NotNull Response<List<Location>> response) {
                         if (!response.isSuccessful()) {
-                            showError(response.message());
+                            APIError error = ErrorUtils
+                                    .parseError(response, RetrofitSingleton.errorConverter);
+
+                            handleUnsuccessfulResponse(error);
+
                             locationListObservable.postValue(
                                     new Resource<List<Location>>()
-                                            .error(response.message(), null));
+                                            .error(error, null));
+
                         } else if (response.body() != null) {
                             addLocationsToDb(response.body());
                         }
@@ -144,12 +150,20 @@ public class AppRepository {
                     @Override
                     public void onFailure(@NotNull Call<List<Location>> call,
                                           @NotNull Throwable t) {
-                        showError(t.getLocalizedMessage());
+                        APIError error = new APIError(ErrorUtils.CustomCodes.NETWORK_ERROR,
+                                0,
+                                t.getLocalizedMessage());
+                        handleUnsuccessfulResponse(error);
                         locationListObservable.postValue(
                                 new Resource<List<Location>>()
-                                        .error(t.getLocalizedMessage(), null));
+                                        .error(error,
+                                                null));
                     }
                 });
+    }
+
+    private void handleUnsuccessfulResponse(APIError error) {
+        Timber.e("APIError: %s", error);
     }
 
     private void showError(String message) {
