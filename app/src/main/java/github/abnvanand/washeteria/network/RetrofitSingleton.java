@@ -1,12 +1,19 @@
 package github.abnvanand.washeteria.network;
 
+import java.lang.annotation.Annotation;
+
 import github.abnvanand.washeteria.BuildConfig;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitSingleton {
+    public static Converter<ResponseBody, APIError> authErrorConverter;
+    public static Converter<ResponseBody, APIError> errorConverter;
     private static Retrofit instance;
     private static Retrofit authInstance;
 
@@ -33,6 +40,8 @@ public class RetrofitSingleton {
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient.build())
                     .build();
+
+            authErrorConverter = authInstance.responseBodyConverter(APIError.class, new Annotation[0]);
         }
 
         return authInstance;
@@ -50,6 +59,8 @@ public class RetrofitSingleton {
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient.build())
                     .build();
+
+            errorConverter = instance.responseBodyConverter(APIError.class, new Annotation[0]);
         }
 
         return instance;
