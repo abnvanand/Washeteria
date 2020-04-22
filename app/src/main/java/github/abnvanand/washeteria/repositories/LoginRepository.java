@@ -11,11 +11,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import github.abnvanand.washeteria.models.LoggedInUser;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
-import github.abnvanand.washeteria.ui.login.LoginResponseError;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,7 +67,7 @@ public class LoginRepository {
                     loggedInStatusObservable
                             .postValue(new LoggedInStatus(false,
                                     null,
-                                    new LoginResponseError(String.valueOf(response.code()), errorMessage)));
+                                    new APIError(String.valueOf(response.code()), response.code(), errorMessage)));
 
                     return;
                 }
@@ -90,7 +90,7 @@ public class LoginRepository {
                 clearFromSharedPrefs();
                 loggedInStatusObservable.postValue(new LoggedInStatus(false,
                         null,
-                        new LoginResponseError("N/W error", t.getLocalizedMessage())));
+                        new APIError("N/W error", 0, t.getLocalizedMessage())));
             }
         });
     }

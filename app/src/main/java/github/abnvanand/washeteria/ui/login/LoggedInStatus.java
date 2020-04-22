@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import github.abnvanand.washeteria.models.LoggedInUser;
+import github.abnvanand.washeteria.models.pojo.APIError;
 
 public class LoggedInStatus {
     @NonNull
@@ -13,12 +14,12 @@ public class LoggedInStatus {
     private LoggedInUser user;
 
     @Nullable
-    private LoginResponseError error;
+    private APIError error;
 
 
     public LoggedInStatus(@NonNull boolean isLoggedIn,
                           @Nullable LoggedInUser user,
-                          @Nullable LoginResponseError error) {
+                          @Nullable APIError error) {
         this.isLoggedIn = isLoggedIn;
         this.user = user;
         this.error = error;
@@ -33,7 +34,7 @@ public class LoggedInStatus {
     }
 
     @Nullable
-    public LoginResponseError getError() {
+    public APIError getError() {
         return error;
     }
 }
