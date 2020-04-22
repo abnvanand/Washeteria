@@ -18,20 +18,24 @@ import java.util.Calendar;
 import java.util.List;
 
 import github.abnvanand.washeteria.R;
+import github.abnvanand.washeteria.databinding.ActivityEventsBinding;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.ui.dashboard.MainActivity;
+import github.abnvanand.washeteria.utils.WeekViewType;
 
 public class ViewSlotsActivity extends AppCompatActivity {
-    private WeekView<BookingEvent> weekView;
-    private EventsViewModel mViewModel;
+
     ArrayList<Integer> eventColors = new ArrayList<>();
+    private ActivityEventsBinding binding;
+    private EventsViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_events);
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityEventsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        setSupportActionBar(binding.toolbarInclude.toolbar);
 
         String locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
         if (TextUtils.isEmpty(locationId)) {
@@ -39,46 +43,49 @@ public class ViewSlotsActivity extends AppCompatActivity {
             return;
         }
 
+        processColorResources();
+
+        WeekView<BookingEvent> weekView = binding.weekView;
+        limitWeekViewRange(weekView);
+
+        initViewModel(locationId, weekView);
+
+        setupListeners(weekView);
+    }
+
+    private void processColorResources() {
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_01));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_02));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_03));
         eventColors.add(ContextCompat.getColor(this, R.color.event_color_04));
-
-        weekView = findViewById(R.id.weekView);
-
-        limitWeekViewRange();
-
-        initViewModel(locationId);
-
-        setupListeners();
     }
 
-    private void initViewModel(String locationId) {
+    private void initViewModel(String locationId, WeekView<BookingEvent> weekView) {
         mViewModel = new ViewModelProvider(this)
                 .get(EventsViewModel.class);
         mViewModel.getDataByLocation(locationId);
         mViewModel.getEventsByLocationObservable()
                 .observe(this, events -> {
-                    fillCalendarView(events);
+                    fillCalendarView(events, weekView);
                 });
 
     }
 
-    private void setupListeners() {
+    private void setupListeners(WeekView<BookingEvent> weekView) {
         weekView.setOnEventClickListener((bookingEvent, eventRect) -> {
             Toast.makeText(ViewSlotsActivity.this,
-                    "Clicked event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_SHORT)
+                    "Event: " + bookingEvent.getStartsAt().getTime(), Toast.LENGTH_SHORT)
                     .show();
 
         });
 
         // Be notified whenever the user clicks on an area where no event is displayed
         weekView.setOnEmptyViewClickListener(calendar -> {
-            Toast.makeText(ViewSlotsActivity.this, "Clicked slot: " + calendar.getTime(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(ViewSlotsActivity.this, "Free slot: " + calendar.getTime(), Toast.LENGTH_SHORT).show();
         });
     }
 
-    private void limitWeekViewRange() {
+    private void limitWeekViewRange(WeekView<BookingEvent> weekView) {
         Calendar now = Calendar.getInstance();
 
         Calendar max = (Calendar) now.clone();
@@ -88,7 +95,7 @@ public class ViewSlotsActivity extends AppCompatActivity {
         weekView.setMaxDate(max);
     }
 
-    private void fillCalendarView(List<Event> events) {
+    private void fillCalendarView(List<Event> events, WeekView<BookingEvent> weekView) {
         List<WeekViewDisplayable<BookingEvent>> weekViewDisplayableList = new ArrayList<>();
 
         for (int i = 0; i < events.size(); i++) {
@@ -134,34 +141,14 @@ public class ViewSlotsActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_today) {
-            weekView.goToToday();
+            binding.weekView.goToToday();
             return true;
         } else {
-            if (currentViewTypeId() != item.getItemId()) {
+            if (id != WeekViewType.getAction(binding.weekView.getNumberOfVisibleDays())) {
                 item.setChecked(!item.isChecked());
-                weekView.setNumberOfVisibleDays(getSelectedItemNumberOfVisibleDays(item));
+                binding.weekView.setNumberOfVisibleDays(WeekViewType.getNumVisibleDays(item.getItemId()));
             }
             return true;
         }
-    }
-
-    // TODO: refactor logic into Enums
-    private int getSelectedItemNumberOfVisibleDays(MenuItem item) {
-        if (item.getItemId() == R.id.action_day_view)
-            return 1;
-        else if (item.getItemId() == R.id.action_three_day_view)
-            return 3;
-        else
-            return 7;
-    }
-
-    private int currentViewTypeId() {
-        int numberOfVisibleDays = weekView.getNumberOfVisibleDays();
-        if (numberOfVisibleDays == 1)
-            return R.id.action_day_view;
-        else if (numberOfVisibleDays == 3)
-            return R.id.action_three_day_view;
-        else
-            return R.id.action_week_view;
     }
 }
