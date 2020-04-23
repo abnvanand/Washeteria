@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -27,16 +26,15 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class AppRepository {
-    private static final String REFRESH_EVENTS_BY_LOCATION_OBSERVERS = "REFRESH_EVENTS_BY_LOC";
-    private static final String REFRESH_EVENTS_BY_MACHINE_OBSERVERS = "REFRESH_EVENTS_BY_MACHINE";
     private static AppRepository instance;// TODO: Make volatile maybe?
-    //    public MutableLiveData<List<Machine>> machines;
+
+    private AppDatabase mDb;
+    private WebService webService;
+
     private MutableLiveData<List<Machine>> machineListObservable = new MutableLiveData<>();
     private MutableLiveData<Resource<List<Location>>> locationListObservable = new MutableLiveData<Resource<List<Location>>>();
     private MutableLiveData<List<Event>> eventsByLocationObservable = new MutableLiveData<>();
     private MutableLiveData<List<Event>> eventsByMachineObservable = new MutableLiveData<>();
-    private AppDatabase mDb;
-    private WebService webService;
 
     /**
      * All room db operations must be executed in a background thread
@@ -62,63 +60,9 @@ public class AppRepository {
         return instance;
     }
 
-    public void fetchMachinesByLocation(String locationId) {
-        loadMachinesByLocationIdFromDb(locationId);
-        getMachinesByLocationidFromWeb(locationId);
-    }
 
-    private void getMachinesByLocationidFromWeb(String locationId) {
-        // Call REST API to get most recent list of machines of selected location
-        webService.getMachines(locationId)
-                .enqueue(new Callback<List<Machine>>() {
-                    @Override
-                    public void onResponse(@NotNull Call<List<Machine>> call,
-                                           @NotNull Response<List<Machine>> response) {
-                        if (!response.isSuccessful()) {
-                            handleUnsuccessfulResponse(ErrorUtils.parseError(response,
-                                    RetrofitSingleton.errorConverter));
-                        }
-
-                        if (response.body() == null) {
-                            Timber.d("Response code: %s but response body is null", response.code());
-                            return;
-                        }
-
-                        addMachinesToDb(response.body(), locationId);
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Call<List<Machine>> call,
-                                          @NotNull Throwable t) {
-                        showError(t.getLocalizedMessage());
-                    }
-                });
-
-    }
-
-    private void addMachinesToDb(List<Machine> body, String locationId) {
-        executor.execute(() -> {
-            mDb.machineDao().insertAll(body);
-            loadMachinesByLocationIdFromDb(locationId);
-        });
-    }
-
-    private void loadMachinesByLocationIdFromDb(String locationId) {
-        executor.execute(() -> {
-            List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
-            machineListObservable.postValue(queryResults);
-        });
-    }
-
-    public MutableLiveData<List<Machine>> getMachineListObservable() {
-        return machineListObservable;
-    }
-
-    public MutableLiveData<Resource<List<Location>>> getLocationListObservable() {
-        return locationListObservable;
-    }
-
-    public void fetchLocations() {
+    // region get locations
+    public void getLocations() {
         loadLocationsFromDb(Status.LOADING);
         fetchLocationsFromWeb();
     }
@@ -162,13 +106,6 @@ public class AppRepository {
                 });
     }
 
-    private void handleUnsuccessfulResponse(APIError error) {
-        Timber.e("APIError: %s", error);
-    }
-
-    private void showError(String message) {
-        Timber.e(message);
-    }
 
     private void addLocationsToDb(List<Location> body) {
         executor.execute(() -> {
@@ -187,6 +124,65 @@ public class AppRepository {
 
         });
     }
+
+    // endregion
+
+
+    // region get machines by location id
+    public void getMachineByLocation(String locationId) {
+        loadMachinesByLocationFromDb(locationId);
+        fetchMachinesByLocationFromWeb(locationId);
+    }
+
+    private void fetchMachinesByLocationFromWeb(String locationId) {
+        // Call REST API to get most recent list of machines of selected location
+        webService.getMachines(locationId)
+                .enqueue(new Callback<List<Machine>>() {
+                    @Override
+                    public void onResponse(@NotNull Call<List<Machine>> call,
+                                           @NotNull Response<List<Machine>> response) {
+                        if (!response.isSuccessful()) {
+                            handleUnsuccessfulResponse(ErrorUtils.parseError(response,
+                                    RetrofitSingleton.errorConverter));
+                        }
+
+                        if (response.body() == null) {
+                            Timber.d("Response code: %s but response body is null", response.code());
+                            return;
+                        }
+
+                        executor.execute(() -> {
+                            addMachinesToDb(response.body());
+                            loadMachinesByLocationFromDb(locationId);
+                        });
+
+
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<List<Machine>> call,
+                                          @NotNull Throwable t) {
+                        handleUnsuccessfulResponse(
+                                new APIError(ErrorUtils.CustomCodes.NETWORK_ERROR,
+                                        0,
+                                        t.getLocalizedMessage()));
+                    }
+                });
+
+    }
+
+    private void loadMachinesByLocationFromDb(String locationId) {
+        executor.execute(() -> {
+            List<Machine> queryResults = mDb.machineDao().getAllByLocationId(locationId);
+            machineListObservable.postValue(queryResults);
+        });
+    }
+    // endregion
+
+    private void addMachinesToDb(List<Machine> body) {
+        mDb.machineDao().insertAll(body);
+    }
+
 
     // region events
 
@@ -207,65 +203,43 @@ public class AppRepository {
                 webService.getEvents()
                         .enqueue(new Callback<List<Event>>() {
                             @Override
-                            public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
+                            public void onResponse(@NotNull Call<List<Event>> call,
+                                                   @NotNull Response<List<Event>> response) {
                                 if (!response.isSuccessful()) {
-                                    showError(response.message());
+                                    handleUnsuccessfulResponse(
+                                            ErrorUtils.parseError(
+                                                    response,
+                                                    RetrofitSingleton.errorConverter));
                                     return;
                                 }
 
-                                addEventsToDb(response.body(),
-                                        REFRESH_EVENTS_BY_LOCATION_OBSERVERS,
-                                        locationId);
+                                executor.execute(() -> {
+                                    addEventsToDb(response.body());
+
+                                    loadEventsByLocationFromDb(locationId);
+                                });
+
+
                             }
 
                             @Override
-                            public void onFailure(Call<List<Event>> call, Throwable t) {
-                                showError(t.getLocalizedMessage());
+                            public void onFailure(@NotNull Call<List<Event>> call,
+                                                  @NotNull Throwable t) {
+                                handleUnsuccessfulResponse(
+                                        new APIError(ErrorUtils.CustomCodes.NETWORK_ERROR,
+                                                0,
+                                                t.getLocalizedMessage()));
                             }
                         });
             }
         });
     }
 
-   /* private void getEventsByLocationFromWeb(String locationId) {
-        // FIXME: call getEventsByLocation()
-        webService.getEvents(null)
-                .enqueue(new Callback<List<Event>>() {
-                    @Override
-                    public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
-                        if (!response.isSuccessful()) {
-                            showError(response.message());
-                            return;
-                        }
-
-                        if (response.body() != null) {
-                            addEventsToDb(
-                                    response.body(),
-                                    REFRESH_EVENTS_BY_LOCATION_OBSERVERS,
-                                    locationId);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<Event>> call, Throwable t) {
-                        showError(t.getLocalizedMessage());
-                    }
-                });
-    }*/
-
     private void loadEventsByLocationFromDb(String locationId) {
         executor.execute(() -> {
             List<Event> queryResults = mDb.eventDao().getAllByLocationId(locationId);
             eventsByLocationObservable.postValue(queryResults);
         });
-    }
-
-    public MutableLiveData<List<Event>> getEventsByLocationObservable() {
-        return eventsByLocationObservable;
-    }
-
-    public MutableLiveData<List<Event>> getEventsByMachineObservable() {
-        return eventsByMachineObservable;
     }
 
     // endregion events by location id
@@ -289,20 +263,27 @@ public class AppRepository {
                 webService.getEvents()
                         .enqueue(new Callback<List<Event>>() {
                             @Override
-                            public void onResponse(Call<List<Event>> call, Response<List<Event>> response) {
+                            public void onResponse(@NotNull Call<List<Event>> call,
+                                                   @NotNull Response<List<Event>> response) {
                                 if (!response.isSuccessful()) {
-                                    showError(response.message());
+                                    handleUnsuccessfulResponse(ErrorUtils.parseError(response,
+                                            RetrofitSingleton.errorConverter));
                                     return;
                                 }
 
-                                addEventsToDb(response.body(),
-                                        REFRESH_EVENTS_BY_MACHINE_OBSERVERS,
-                                        machineId);
+                                executor.execute(() -> {
+                                    addEventsToDb(response.body());
+                                    loadEventsByMachineFromDb(machineId);
+                                });
                             }
 
                             @Override
-                            public void onFailure(Call<List<Event>> call, Throwable t) {
-                                showError(t.getLocalizedMessage());
+                            public void onFailure(@NotNull Call<List<Event>> call,
+                                                  @NotNull Throwable t) {
+                                handleUnsuccessfulResponse(
+                                        new APIError(ErrorUtils.CustomCodes.NETWORK_ERROR,
+                                                0,
+                                                t.getLocalizedMessage()));
                             }
                         });
             }
@@ -319,20 +300,33 @@ public class AppRepository {
     // endregion events by machine id
 
 
-    private void addEventsToDb(List<Event> body,
-                               @Nullable String REFRESH_TYPE,
-                               @Nullable String REFRESH_KEY) {
-        executor.execute(() -> {
-            mDb.eventDao().insertAll(body);
+    private void addEventsToDb(List<Event> body) {
+        mDb.eventDao().insertAll(body);
 
-            if (REFRESH_EVENTS_BY_LOCATION_OBSERVERS.equals(REFRESH_TYPE)) {
-                loadEventsByLocationFromDb(REFRESH_KEY);
-            } else if (REFRESH_EVENTS_BY_MACHINE_OBSERVERS.equals(REFRESH_TYPE)) {
-                loadEventsByMachineFromDb(REFRESH_KEY);
-            }
-        });
     }
 
     // endregion events
+
+
+    public MutableLiveData<List<Machine>> getMachineListObservable() {
+        return machineListObservable;
+    }
+
+    public MutableLiveData<Resource<List<Location>>> getLocationListObservable() {
+        return locationListObservable;
+    }
+
+    public MutableLiveData<List<Event>> getEventsByLocationObservable() {
+        return eventsByLocationObservable;
+    }
+
+    public MutableLiveData<List<Event>> getEventsByMachineObservable() {
+        return eventsByMachineObservable;
+    }
+
+    private void handleUnsuccessfulResponse(APIError error) {
+        Timber.e("APIError: %s", error);
+    }
+
 
 }

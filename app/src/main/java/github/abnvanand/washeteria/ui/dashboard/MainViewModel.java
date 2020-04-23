@@ -27,7 +27,7 @@ public class MainViewModel extends AndroidViewModel {
         super(application);
         mRepository = AppRepository.getInstance(application.getApplicationContext());
 
-        mRepository.fetchLocations();
+        mRepository.getLocations();
 
         //subscribe to Livedata of the repository and pass it along to the view (activity - fragment etc)
         locationListObservable.addSource(mRepository.getLocationListObservable(),
@@ -43,11 +43,11 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void refreshLocations() {
-        mRepository.fetchLocations();
+        mRepository.getLocations();
     }
 
     public void getData(String locationId) {
-        mRepository.fetchMachinesByLocation(locationId);
+        mRepository.getMachineByLocation(locationId);
     }
 
     public LiveData<List<Machine>> getMachinesListObservable() {
