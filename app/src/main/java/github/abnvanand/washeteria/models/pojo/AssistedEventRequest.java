@@ -2,8 +2,6 @@ package github.abnvanand.washeteria.models.pojo;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import github.abnvanand.washeteria.ui.assistant.Interval;
@@ -21,8 +19,8 @@ public class AssistedEventRequest {
     @SerializedName("ignorePreference")
     private boolean reserveEvenIfNoMatch;
 
-    @SerializedName("durationRange")
-    private List<Float> durationRange;
+    @SerializedName("duration")
+    private long duration;
 
     private transient String token; // GSON excludes transient field from (de)serialization
 
@@ -46,6 +44,14 @@ public class AssistedEventRequest {
         }
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
     public String getToken() {
         return token;
     }
@@ -62,13 +68,6 @@ public class AssistedEventRequest {
         this.reserveEvenIfNoMatch = reserveEvenIfNoMatch;
     }
 
-    public List<Float> getDurationRange() {
-        return durationRange;
-    }
-
-    public void setDurationRange(List<Float> durationRange) {
-        this.durationRange = durationRange;
-    }
 
     public String getCreator() {
         return creator;

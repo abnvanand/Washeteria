@@ -21,12 +21,9 @@ import org.jetbrains.annotations.NotNull;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import github.abnvanand.washeteria.R;
 import github.abnvanand.washeteria.database.AppDatabase;
@@ -107,11 +104,10 @@ public class AssistantActivity extends AppCompatActivity {
     }
 
     private void setupSliderUI() {
-        binding.durationSlider.rangeSlider.setValues((float) Constants.MAX_DURATION / 2, (float) Constants.MAX_DURATION);
-        binding.durationSlider.valueStart.setText(String.format(Locale.ENGLISH, "%d", Constants.MAX_DURATION / 2));
-        binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%d", Constants.MAX_DURATION));
         binding.durationSlider.rangeSlider.setValueFrom(Constants.MIN_DURATION);
         binding.durationSlider.rangeSlider.setValueTo(Constants.MAX_DURATION);
+        binding.durationSlider.rangeSlider.setValue(Constants.MAX_DURATION / 2);
+        binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%d", Constants.MAX_DURATION / 2));
     }
 
     private void sendAPIRequest(AssistedEventRequest assistedEventRequest) {
@@ -272,7 +268,8 @@ public class AssistantActivity extends AppCompatActivity {
                 assistedEventRequest.setToken(mLoggedInStatus.getUser().getToken());
                 assistedEventRequest.setIntervals(intervals);
                 assistedEventRequest.setReserveEvenIfNoMatch(binding.switchConsent.isChecked());
-                assistedEventRequest.setDurationRange(binding.durationSlider.rangeSlider.getValues().stream().sorted().collect(Collectors.toList()));
+                assistedEventRequest.setDuration((long) binding.durationSlider.rangeSlider.getValue());
+
                 assistedEventRequest.setLocationId(locationId);
                 assistedEventRequest.setCreator(mLoggedInStatus.getUser().getUsername());
 
@@ -283,9 +280,7 @@ public class AssistantActivity extends AppCompatActivity {
         binding.durationSlider.rangeSlider.addOnChangeListener(new Slider.OnChangeListener() {
             @Override
             public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
-                List<Float> values = slider.getValues();
-                binding.durationSlider.valueStart.setText(String.format(Locale.ENGLISH, "%.0f", Collections.min(values)));
-                binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%.0f", Collections.max(values)));
+                binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%.0f", value));
             }
         });
 
