@@ -31,6 +31,7 @@ import github.abnvanand.washeteria.databinding.ActivityAssistantBinding;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.models.pojo.AssistedEventRequest;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
@@ -40,10 +41,13 @@ import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.ChipMaps;
 import github.abnvanand.washeteria.utils.Constants;
+import github.abnvanand.washeteria.utils.ErrorUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
+
+import static github.abnvanand.washeteria.utils.ErrorUtils.CustomCodes.NETWORK_ERROR;
 
 public class AssistantActivity extends AppCompatActivity {
 
@@ -118,10 +122,12 @@ public class AssistantActivity extends AppCompatActivity {
 
                 .enqueue(new Callback<Event>() {
                     @Override
-                    public void onResponse(Call<Event> call, Response<Event> response) {
+                    public void onResponse(@NotNull Call<Event> call, @NotNull Response<Event> response) {
                         binding.loading.setVisibility(View.INVISIBLE);
                         if (!response.isSuccessful()) {
-                            handleUnsuccessfulResponse(response);
+                            APIError error = ErrorUtils.parseError(response,
+                                    RetrofitSingleton.authErrorConverter);
+                            handleUnsuccessfulResponse(error);
                             return;
                         }
 
@@ -135,15 +141,12 @@ public class AssistantActivity extends AppCompatActivity {
                         }
 
                         displayCreatedEvent(body);
-
                     }
 
                     @Override
                     public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
                         binding.loading.setVisibility(View.INVISIBLE);
-                        Toast.makeText(AssistantActivity.this,
-                                "Err: " + t.getLocalizedMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        handleUnsuccessfulResponse(new APIError(NETWORK_ERROR, 0, t.getLocalizedMessage()));
                     }
                 });
     }
@@ -197,8 +200,10 @@ public class AssistantActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void handleUnsuccessfulResponse(Response<Event> response) {
-        switch (response.code()) {
+    private void handleUnsuccessfulResponse(APIError error) {
+        // TODO: uncomment logout function
+        Timber.e("APIError: %s", error);
+        switch (error.getHttpStatusCode()) {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
                 loginViewModel.logout();
                 Snackbar.make(
@@ -214,12 +219,13 @@ public class AssistantActivity extends AppCompatActivity {
             default:
                 Toast.makeText(this,
                         "Err: " +
-                                (!TextUtils.isEmpty(response.message()) ?
-                                        response.message() :
-                                        response.code()),
+                                (!TextUtils.isEmpty(error.getMesssage()) ?
+                                        error.getMesssage() :
+                                        error.getHttpStatusCode()),
                         Toast.LENGTH_SHORT).show();
 
         }
+
     }
 
     @NotNull
