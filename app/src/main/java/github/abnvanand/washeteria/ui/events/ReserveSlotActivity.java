@@ -30,6 +30,7 @@ import github.abnvanand.washeteria.databinding.ActivityReserveSlotBinding;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
@@ -38,6 +39,7 @@ import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.Constants;
+import github.abnvanand.washeteria.utils.ErrorUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,6 +47,7 @@ import timber.log.Timber;
 
 import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_CLICKED_MILLIS;
 import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_MACHINE_ID;
+import static github.abnvanand.washeteria.utils.ErrorUtils.CustomCodes.NETWORK_ERROR;
 
 public class ReserveSlotActivity extends AppCompatActivity {
     private static final String durationValueFormat = "%.0f";
@@ -160,7 +163,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
                 binding.loading.setVisibility(View.INVISIBLE);
 
                 if (!response.isSuccessful()) {
-                    handleUnsuccessfulResponse(response);
+                    APIError error = ErrorUtils.parseError(response, RetrofitSingleton.authErrorConverter);
+                    handleUnsuccessfulResponse(error);
                     return;
                 }
 
@@ -187,15 +191,15 @@ public class ReserveSlotActivity extends AppCompatActivity {
             public void onFailure(@NotNull Call<Event> call, @NotNull Throwable t) {
                 binding.loading.setVisibility(View.INVISIBLE);
 
-                Toast.makeText(ReserveSlotActivity.this,
-                        "Error: " + t.getLocalizedMessage(),
-                        Toast.LENGTH_LONG).show();
+                handleUnsuccessfulResponse(new APIError(NETWORK_ERROR, 0, t.getLocalizedMessage()));
             }
         });
     }
 
-    private void handleUnsuccessfulResponse(Response<Event> response) {
-        switch (response.code()) {
+    private void handleUnsuccessfulResponse(APIError error) {
+        Timber.e("APIError: %s", error);
+
+        switch (error.getHttpStatusCode()) {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
                 loginViewModel.logout();
                 Snackbar.make(
@@ -211,9 +215,9 @@ public class ReserveSlotActivity extends AppCompatActivity {
             default:
                 Toast.makeText(ReserveSlotActivity.this,
                         "Err: " +
-                                (!TextUtils.isEmpty(response.message()) ?
-                                        response.message() :
-                                        response.code()),
+                                (!TextUtils.isEmpty(error.getMesssage()) ?
+                                        error.getMesssage() :
+                                        error.getHttpStatusCode()),
                         Toast.LENGTH_SHORT).show();
 
         }

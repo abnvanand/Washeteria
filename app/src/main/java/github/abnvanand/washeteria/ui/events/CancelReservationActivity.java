@@ -20,12 +20,14 @@ import github.abnvanand.washeteria.databinding.ActivityCancelReservationBinding;
 import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
+import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
 import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.Constants;
+import github.abnvanand.washeteria.utils.ErrorUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -141,7 +143,8 @@ public class CancelReservationActivity extends AppCompatActivity {
                 binding.loading.setVisibility(View.INVISIBLE);
 
                 if (!response.isSuccessful()) {
-                    handleUnsuccessfulResponse(response);
+                    APIError error = ErrorUtils.parseError(response, RetrofitSingleton.authErrorConverter);
+                    handleUnsuccessfulResponse(error);
                     return;
                 }
 
@@ -171,8 +174,8 @@ public class CancelReservationActivity extends AppCompatActivity {
         });
     }
 
-    private void handleUnsuccessfulResponse(Response<Event> response) {
-        switch (response.code()) {
+    private void handleUnsuccessfulResponse(APIError error) {
+        switch (error.getHttpStatusCode()) {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
                 loginViewModel.logout();
                 loginSnackbar
@@ -181,10 +184,11 @@ public class CancelReservationActivity extends AppCompatActivity {
                 break;
             default:
                 Toast.makeText(CancelReservationActivity.this,
-                        "Err: " + (!TextUtils.isEmpty(response.message()) ? response.message() : response.code()),
+                        "Err: "
+                                + (!TextUtils.isEmpty(error.getMesssage())
+                                ? error.getMesssage() : error.getHttpStatusCode()),
                         Toast.LENGTH_SHORT)
                         .show();
-
         }
     }
 
