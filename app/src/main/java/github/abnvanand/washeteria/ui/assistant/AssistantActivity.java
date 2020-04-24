@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -351,14 +352,68 @@ public class AssistantActivity extends AppCompatActivity {
                 end.setTime(now.getTime());
                 end.set(Calendar.HOUR_OF_DAY, time.getEndHour());
 
-                intervals.add(
-                        new Interval()
-                                .setStartMillis(start.getTimeInMillis())
-                                .setEndMillis(end.getTimeInMillis()));
+                Interval interval = new Interval()
+                        .setStartMillis(start.getTimeInMillis())
+                        .setEndMillis(end.getTimeInMillis());
+
+                Calendar currentExactTime = Calendar.getInstance();
+                currentExactTime.add(Calendar.MINUTE, 15);
+                long currentTimestamp = currentExactTime.getTimeInMillis();
+
+                if (interval.getStartMillis() > currentTimestamp) {
+                    // selected interval starts after current time so now issues here
+                    // as selected interval can be allocated
+                    intervals.add(interval);
+                } else if (interval.getEndMillis() < currentTimestamp) {
+                    // Interval lies before current time
+                    // so assume user wants to reserve this days slot in next week
+                    // eg Today is Monday and current time is 2pm,
+                    // user select the time range 6am to 10am
+                    // so we will reserve the slot for next Monday somewhere between 6am-10am
+                    // so add 7 to days and construct the time stamp
+                    start.add(Calendar.DAY_OF_WEEK, 7);
+                    end.add(Calendar.DAY_OF_WEEK, 7);
+                    interval.setStartMillis(start.getTimeInMillis());
+                    interval.setEndMillis(end.getTimeInMillis());
+                    intervals.add(interval);
+                } else {
+                    // Current timestamp lies between start and end of the selected range
+                    // so we need to split it into 2 parts
+                    // first part start to current timestamp will be reserved for next week
+                    // second part current timestamp to end will be reserved for today
+                    // as it is still a valid range
+                    intervals.addAll(splitInterval(interval, currentTimestamp));
+                }
 
             }
         }
 
         return intervals;
+    }
+
+    private List<Interval> splitInterval(Interval interval, long currentTimestamp) {
+        List<Interval> result = new ArrayList<>();
+
+        Calendar interval1Start = Calendar.getInstance();
+        interval1Start.setTimeInMillis(interval.getStartMillis());
+        interval1Start.add(Calendar.DAY_OF_WEEK, 7);
+
+        Calendar interval1End = Calendar.getInstance();
+        interval1End.setTimeInMillis(currentTimestamp);
+        interval1End.add(Calendar.DAY_OF_WEEK, 7);
+        result.add(
+                new Interval()
+                        .setStartMillis(interval1Start.getTimeInMillis())
+                        .setEndMillis(interval1End.getTimeInMillis()));
+
+        Calendar interval2Start = Calendar.getInstance();
+        interval2Start.setTimeInMillis(currentTimestamp);
+        Calendar interval2End = Calendar.getInstance();
+        interval2End.setTimeInMillis(interval.getEndMillis());
+        result.add(new Interval()
+                .setStartMillis(interval2Start.getTimeInMillis())
+                .setEndMillis(interval2End.getTimeInMillis()));
+
+        return result;
     }
 }
