@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener, FabSpeedDial.MenuListener, SwipeRefreshLayout.OnRefreshListener, AdapterView.OnItemSelectedListener {
 
     public static final String EXTRA_SELECTED_LOCATION_ID = "EXTRA_CURR_LOC_ID";
-    public static final String EXTRA_SELECTED_MACHINE_ID = "EXTRA_SELECTED_MACHINE";
 
     private ActivityMainBinding binding;
 
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity
         ItemClickSupport.addTo(mRecyclerView)
                 .setOnItemClickListener((view, position, v) -> {
                     Intent intent = new Intent(MainActivity.this, EventsForMachineActivity.class);
-                    intent.putExtra(EXTRA_SELECTED_MACHINE_ID,
+                    intent.putExtra(EventsForMachineActivity.EXTRA_SELECTED_MACHINE_ID,
                             machineAdapter.getItem(position).getId());
                     startActivity(intent);
                 });

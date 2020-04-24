@@ -34,9 +34,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import timber.log.Timber;
 
-import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_EVENT_ID;
-
 public class CancelReservationActivity extends AppCompatActivity {
+    public static final String EXTRA_EVENT_ID = "clicked_event_id";
+
     Executor executor = Executors.newSingleThreadExecutor();
     //    String token;
     Event eventToCancel;

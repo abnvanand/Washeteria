@@ -44,11 +44,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_CLICKED_MILLIS;
-import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXTRA_MACHINE_ID;
 import static github.abnvanand.washeteria.utils.ErrorUtils.CustomCodes.NETWORK_ERROR;
 
 public class ReserveSlotActivity extends AppCompatActivity {
+    public static final String EXTRA_MACHINE_ID = "machine_id";
+    public static final String EXTRA_CLICKED_MILLIS = "calendar_object";
+
     private ActivityReserveSlotBinding binding;
     private LoginViewModel loginViewModel;
 
@@ -215,7 +216,7 @@ public class ReserveSlotActivity extends AppCompatActivity {
                         "Err: " +
                                 (!TextUtils.isEmpty(error.getMesssage()) ?
                                         error.getMesssage() :
-                                        error.getHttpStatusCode()),
+                                        "Try again later."),
                         Toast.LENGTH_SHORT).show();
 
         }

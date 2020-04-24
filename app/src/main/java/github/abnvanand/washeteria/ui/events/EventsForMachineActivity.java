@@ -32,13 +32,10 @@ import github.abnvanand.washeteria.ui.login.LoginViewModel;
 import github.abnvanand.washeteria.utils.WeekViewType;
 import timber.log.Timber;
 
-import static github.abnvanand.washeteria.ui.dashboard.MainActivity.EXTRA_SELECTED_MACHINE_ID;
 
 public class EventsForMachineActivity extends AppCompatActivity {
+    public static final String EXTRA_SELECTED_MACHINE_ID = "EXTRA_SELECTED_MACHINE";
 
-    public static final String EXTRA_MACHINE_ID = "machine_id";
-    public static final String EXTRA_CLICKED_MILLIS = "calendar_object";
-    public static final String EXTRA_EVENT_ID = "clicked_event_id";
     public static final int REQUEST_EVENT_CREATION_STATUS = 1003;
     public static final int REQUEST_EVENT_CANCEL_STATUS = 1004;
 
@@ -135,7 +132,7 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, CancelReservationActivity.class);
             String eventId = bookingIdToEventIdMapping.get(bookingEvent.getId());
-            intent.putExtra(EXTRA_EVENT_ID, eventId); // event object which contains event id
+            intent.putExtra(CancelReservationActivity.EXTRA_EVENT_ID, eventId); // event object which contains event id
             startActivityForResult(intent, REQUEST_EVENT_CANCEL_STATUS);
 
         });
@@ -152,8 +149,8 @@ public class EventsForMachineActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this,
                     ReserveSlotActivity.class);
-            intent.putExtra(EXTRA_MACHINE_ID, machineId);
-            intent.putExtra(EXTRA_CLICKED_MILLIS, calendar.getTimeInMillis());
+            intent.putExtra(ReserveSlotActivity.EXTRA_MACHINE_ID, machineId);
+            intent.putExtra(ReserveSlotActivity.EXTRA_CLICKED_MILLIS, calendar.getTimeInMillis());
             startActivityForResult(intent, REQUEST_EVENT_CREATION_STATUS);
         });
     }
