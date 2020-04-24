@@ -1,9 +1,13 @@
 package github.abnvanand.washeteria.ui.assistant;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Date;
 
 public class Interval {
+    @SerializedName("startTime")
     private long startSeconds;
+    @SerializedName("endTime")
     private long endSeconds;
 
     public long getStartSeconds() {

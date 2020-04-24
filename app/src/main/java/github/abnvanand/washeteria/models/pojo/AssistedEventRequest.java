@@ -14,7 +14,7 @@ public class AssistedEventRequest {
     private String locationId;
 
     @SerializedName("preferences")
-    private List<List<Long>> intervals;
+    private List<Interval> intervals;
 
     @SerializedName("ignorePreference")
     private boolean reserveEvenIfNoMatch;
@@ -25,23 +25,11 @@ public class AssistedEventRequest {
     private transient String token; // GSON excludes transient field from (de)serialization
 
     public List<Interval> getIntervals() {
-        List<Interval> intervals = new ArrayList<>();
-        this.intervals.forEach(pair -> {
-            intervals.add(new Interval().setStartSeconds(pair.get(0)).setEndSeconds(pair.get(0)));
-        });
-
         return intervals;
     }
 
     public void setIntervals(List<Interval> intervals) {
-        this.intervals = new ArrayList<>();
-
-        for (Interval interval : intervals) {
-            this.intervals.add(
-                    Arrays.asList(
-                            interval.getStartSeconds(),
-                            interval.getEndSeconds()));
-        }
+        this.intervals = intervals;
     }
 
     public long getDuration() {
