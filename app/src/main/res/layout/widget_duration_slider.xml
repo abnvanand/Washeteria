@@ -4,29 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    tools:showIn="@layout/activity_assistant">
+    tools:showIn="@layout/activity_reserve_slot">
 
     <TextView
-        android:id="@+id/value_start"
+        android:id="@+id/start_text"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:gravity="end"
         android:visibility="gone"
-        tools:text="1" />
+        tools:text="30" />
 
     <com.google.android.material.slider.Slider
-        android:id="@+id/range_slider"
+        android:id="@+id/slider"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:stepSize="1"
         android:valueFrom="1"
-        android:valueTo="50" />
+        android:valueTo="60" />
 
     <TextView
-        android:id="@+id/value_end"
+        android:id="@+id/end_text"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:gravity="start"
-        tools:text="50" />
+        tools:text="30 min" />
 </LinearLayout>

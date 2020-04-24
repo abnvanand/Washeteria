@@ -16,7 +16,6 @@ import com.google.android.material.snackbar.Snackbar;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -50,9 +49,6 @@ import static github.abnvanand.washeteria.ui.events.EventsForMachineActivity.EXT
 import static github.abnvanand.washeteria.utils.ErrorUtils.CustomCodes.NETWORK_ERROR;
 
 public class ReserveSlotActivity extends AppCompatActivity {
-    private static final String durationValueFormat = "%.0f";
-    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
     private ActivityReserveSlotBinding binding;
     private LoginViewModel loginViewModel;
 
@@ -86,17 +82,19 @@ public class ReserveSlotActivity extends AppCompatActivity {
         }
 
 
-        binding.durationSlider.setValueFrom(Constants.MIN_DURATION);
-        binding.durationSlider.setValueTo(Constants.MAX_DURATION);
-        binding.durationSlider.setValue(Constants.DEFAULT_DURATION);
-        binding.durationSliderValue
-                .setText(String.format(Locale.ENGLISH, durationValueFormat,
-                        binding.durationSlider.getValue()));
+        binding.durationWidget.slider.setLabelFormatter(
+                value -> String.format(Locale.ENGLISH, Constants.durationValueFormat, value));
+        binding.durationWidget.slider.setValueFrom(Constants.MIN_DURATION);
+        binding.durationWidget.slider.setValueTo(Constants.MAX_DURATION);
+        binding.durationWidget.slider.setValue(Constants.DEFAULT_DURATION);
+        binding.durationWidget.endText
+                .setText(String.format(Locale.ENGLISH, Constants.durationValueFormat,
+                        binding.durationWidget.slider.getValue()));
 
 
         startsAtCalendarObject = Calendar.getInstance();
         startsAtCalendarObject.setTime(new Date(millis));
-        updateUiWithStartEndTime(startsAtCalendarObject, binding.durationSlider.getValue());
+        updateUiWithStartEndTime(startsAtCalendarObject, binding.durationWidget.slider.getValue());
 
         executor.execute(() -> {
             SessionManager sessionManager = new SessionManager(this);
@@ -123,9 +121,9 @@ public class ReserveSlotActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        binding.durationSlider.addOnChangeListener((slider, value, fromUser) -> {
-            binding.durationSliderValue
-                    .setText(String.format(Locale.ENGLISH, durationValueFormat, value));
+        binding.durationWidget.slider.addOnChangeListener((slider, value, fromUser) -> {
+            binding.durationWidget.endText
+                    .setText(String.format(Locale.ENGLISH, Constants.durationValueFormat, value));
 
             updateUiWithStartEndTime(startsAtCalendarObject, value);
         });
@@ -264,7 +262,7 @@ public class ReserveSlotActivity extends AppCompatActivity {
 
                     startsAtCalendarObject = newCalendar;
 
-                    updateUiWithStartEndTime(startsAtCalendarObject, binding.durationSlider.getValue());
+                    updateUiWithStartEndTime(startsAtCalendarObject, binding.durationWidget.slider.getValue());
                 });
         alertDialog.setView(dialogView);
         alertDialog.show();
@@ -275,22 +273,22 @@ public class ReserveSlotActivity extends AppCompatActivity {
         endsAtCalendarObject.add(Calendar.MINUTE, (int) durationSliderValue);
 
         binding.startsAtWidget.eventDate
-                .setText(dateFormat.format(startsAtCalendarObject.getTime()));
+                .setText(Constants.dateFormat.format(startsAtCalendarObject.getTime()));
         binding.startsAtWidget.eventTime
-                .setText(timeFormat.format(startsAtCalendarObject.getTime()));
+                .setText(Constants.timeFormat.format(startsAtCalendarObject.getTime()));
 
 
         binding.endsAtWidget.eventDate
-                .setText(dateFormat.format(endsAtCalendarObject.getTime()));
+                .setText(Constants.dateFormat.format(endsAtCalendarObject.getTime()));
         binding.endsAtWidget.eventTime
-                .setText(timeFormat.format(endsAtCalendarObject.getTime()));
+                .setText(Constants.timeFormat.format(endsAtCalendarObject.getTime()));
 
         Timber.d("StartsAtCalendar Object %s %s",
-                dateFormat.format(startsAtCalendarObject.getTime()),
-                timeFormat.format(startsAtCalendarObject.getTime()));
+                Constants.dateFormat.format(startsAtCalendarObject.getTime()),
+                Constants.timeFormat.format(startsAtCalendarObject.getTime()));
 
         Timber.d("EndsAtCalendar Object %s %s",
-                dateFormat.format(endsAtCalendarObject.getTime()),
-                timeFormat.format(endsAtCalendarObject.getTime()));
+                Constants.dateFormat.format(endsAtCalendarObject.getTime()),
+                Constants.timeFormat.format(endsAtCalendarObject.getTime()));
     }
 }

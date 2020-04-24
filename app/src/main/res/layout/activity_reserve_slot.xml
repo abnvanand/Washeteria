@@ -29,15 +29,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Machine"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
                 android:id="@+id/machineName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textAppearance="?attr/textAppearanceHeadline4"
-                android:textSize="25sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorPrimaryDark"
                 tools:text="OBH1" />
         </LinearLayout>
 
@@ -98,28 +98,9 @@
             android:layout_height="wrap_content"
             android:text="Select duration" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-
-            <com.google.android.material.slider.Slider
-                android:id="@+id/durationSlider"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:stepSize="1"
-                android:valueFrom="1"
-                android:valueTo="60" />
-
-            <TextView
-                android:id="@+id/durationSliderValue"
-                android:layout_width="48dp"
-                android:layout_height="wrap_content"
-                tools:text="30" />
-        </LinearLayout>
-
+        <include
+            android:id="@+id/durationWidget"
+            layout="@layout/widget_duration_slider" />
 
         <ProgressBar
             android:id="@+id/loading"

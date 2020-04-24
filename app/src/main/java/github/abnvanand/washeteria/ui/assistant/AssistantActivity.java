@@ -108,10 +108,15 @@ public class AssistantActivity extends AppCompatActivity {
     }
 
     private void setupSliderUI() {
-        binding.durationSlider.rangeSlider.setValueFrom(Constants.MIN_DURATION);
-        binding.durationSlider.rangeSlider.setValueTo(Constants.MAX_DURATION);
-        binding.durationSlider.rangeSlider.setValue(Constants.MAX_DURATION / 2);
-        binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%d", Constants.MAX_DURATION / 2));
+
+        binding.durationWidget.slider.setLabelFormatter(
+                value -> String.format(Locale.ENGLISH, Constants.durationValueFormat, value));
+        binding.durationWidget.slider.setValueFrom(Constants.MIN_DURATION);
+        binding.durationWidget.slider.setValueTo(Constants.MAX_DURATION);
+        binding.durationWidget.slider.setValue(Constants.MAX_DURATION / 2.0f);
+        binding.durationWidget.endText.setText(
+                String.format(Locale.ENGLISH,
+                        Constants.durationValueFormat, Constants.MAX_DURATION / 2.0f));
     }
 
     private void sendAPIRequest(AssistedEventRequest assistedEventRequest) {
@@ -274,7 +279,7 @@ public class AssistantActivity extends AppCompatActivity {
                 assistedEventRequest.setToken(mLoggedInStatus.getUser().getToken());
                 assistedEventRequest.setIntervals(intervals);
                 assistedEventRequest.setReserveEvenIfNoMatch(binding.switchConsent.isChecked());
-                assistedEventRequest.setDuration((long) binding.durationSlider.rangeSlider.getValue());
+                assistedEventRequest.setDuration((long) binding.durationWidget.slider.getValue());
 
                 assistedEventRequest.setLocationId(locationId);
                 assistedEventRequest.setCreator(mLoggedInStatus.getUser().getUsername());
@@ -283,10 +288,11 @@ public class AssistantActivity extends AppCompatActivity {
             }
         });
 
-        binding.durationSlider.rangeSlider.addOnChangeListener(new Slider.OnChangeListener() {
+        binding.durationWidget.slider.addOnChangeListener(new Slider.OnChangeListener() {
             @Override
             public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
-                binding.durationSlider.valueEnd.setText(String.format(Locale.ENGLISH, "%.0f", value));
+                binding.durationWidget.endText.setText(String.format(Locale.ENGLISH,
+                        Constants.durationValueFormat, value));
             }
         });
 

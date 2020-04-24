@@ -201,8 +201,8 @@
 
 
             <include
-                android:id="@+id/durationSlider"
-                layout="@layout/widget_duration_range" />
+                android:id="@+id/durationWidget"
+                layout="@layout/widget_duration_slider" />
 
 
             <com.google.android.material.switchmaterial.SwitchMaterial
