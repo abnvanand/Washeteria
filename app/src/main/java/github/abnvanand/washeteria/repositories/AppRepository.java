@@ -144,6 +144,7 @@ public class AppRepository {
                         if (!response.isSuccessful()) {
                             handleUnsuccessfulResponse(ErrorUtils.parseError(response,
                                     RetrofitSingleton.errorConverter));
+                            return;
                         }
 
                         if (response.body() == null) {
