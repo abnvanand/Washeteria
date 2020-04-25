@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity
             binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.RED));
             binding.locationProgress.setProgressBackgroundTintList(ColorStateList.valueOf(Color.RED));
             binding.locationProgress.setIndeterminate(false);
+            binding.locationProgress.setProgress(0);
             binding.locationWidget.btnReload.setVisibility(View.VISIBLE);
         } else if (status == Status.SUCCESS) {
             binding.locationProgress.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#3F51B5")));
