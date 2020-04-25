@@ -6,7 +6,7 @@ import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.LoggedInUser;
 import github.abnvanand.washeteria.models.Machine;
-import github.abnvanand.washeteria.models.pojo.AssistedEventRequest;
+import github.abnvanand.washeteria.models.pojo.AssistedEvent;
 import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -41,6 +41,6 @@ public interface WebService {
 //    Call<List<Event>> getEventsAfter(@Query("modifiedAfter") Long modifiedAfter);
 
     @POST("events/assisted")
-    Call<Event> createAssistedEvent(@Body AssistedEventRequest assistedEventRequest);
+    Call<Event> createAssistedEvent(@Body AssistedEvent assistedEvent);
 
 }

@@ -7,13 +7,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +31,7 @@ import github.abnvanand.washeteria.models.Event;
 import github.abnvanand.washeteria.models.Location;
 import github.abnvanand.washeteria.models.Machine;
 import github.abnvanand.washeteria.models.pojo.APIError;
-import github.abnvanand.washeteria.models.pojo.AssistedEventRequest;
+import github.abnvanand.washeteria.models.pojo.AssistedEvent;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
 import github.abnvanand.washeteria.ui.dashboard.MainActivity;
@@ -57,10 +55,8 @@ public class AssistantActivity extends AppCompatActivity {
     private LoggedInStatus mLoggedInStatus;
     private LoginViewModel loginViewModel;
 
-    private String locationId;
-
     private Snackbar loginSnackbar;
-    private AssistedEventRequest assistedEventRequest;
+    private AssistedEvent.Builder assistedEventBuilder = new AssistedEvent.Builder();
 
 
     @Override
@@ -70,11 +66,12 @@ public class AssistantActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbarInclude.toolbar);
 
-        locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
+        String locationId = getIntent().getStringExtra(MainActivity.EXTRA_SELECTED_LOCATION_ID);
         if (TextUtils.isEmpty(locationId)) {
             Toast.makeText(this, "You must select a location first", Toast.LENGTH_SHORT).show();
             return;
         }
+        assistedEventBuilder.setLocationId(locationId);
 
         loginSnackbar = Snackbar
                 .make(binding.getRoot(),
@@ -87,14 +84,20 @@ public class AssistantActivity extends AppCompatActivity {
                     }
                 });
 
-
-        assistedEventRequest = new AssistedEventRequest();
-
-        setupSliderUI();
+        setupUI();
 
         setupListeners();
 
         registerWithLoginViewModel();
+    }
+
+    private void setupUI() {
+        binding.dayChipGroup.setSelectionRequired(true);
+        binding.timeChipGroup.setSelectionRequired(true);
+        binding.chipSat.setChecked(true);
+        binding.chipSun.setChecked(true);
+        binding.chipNight.setChecked(true);
+        setupSliderUI();
     }
 
     private void registerWithLoginViewModel() {
@@ -120,11 +123,11 @@ public class AssistantActivity extends AppCompatActivity {
                         Constants.durationValueFormat, Constants.MAX_DURATION / 2.0f));
     }
 
-    private void sendAPIRequest(AssistedEventRequest assistedEventRequest) {
+    private void sendAPIRequest(AssistedEvent assistedEvent, String token) {
         // FIXME: GET Token
-        RetrofitSingleton.getAuthorizedInstance(assistedEventRequest.getToken())
+        RetrofitSingleton.getAuthorizedInstance(token)
                 .create(WebService.class)
-                .createAssistedEvent(assistedEventRequest)
+                .createAssistedEvent(assistedEvent)
 
                 .enqueue(new Callback<Event>() {
                     @Override
@@ -248,53 +251,53 @@ public class AssistantActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        binding.btnReserve.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLoggedInStatus == null || !mLoggedInStatus.isLoggedIn() || mLoggedInStatus.getUser() == null) {
-                    loginSnackbar
-                            .setText("You must be logged in to reserve a slot.")
-                            .show();
-                    return;
-                }
+        binding.btnReserve.setOnClickListener(v -> {
+            if (mLoggedInStatus == null
+                    || !mLoggedInStatus.isLoggedIn()
+                    || mLoggedInStatus.getUser() == null) {
+                loginSnackbar
+                        .setText("You must be logged in to reserve a slot.")
+                        .show();
+                return;
+            }
 
-                binding.loading.setVisibility(View.VISIBLE);
+            binding.loading.setVisibility(View.VISIBLE);
 
-                ArrayList<Integer> days = new ArrayList<>();
-                ArrayList<Prahar> selectedTimeRanges = new ArrayList<>();
+            ArrayList<Integer> days = new ArrayList<>();
+            ArrayList<Prahar> selectedTimeRanges = new ArrayList<>();
 
-                binding.dayChipGroup.getCheckedChipIds().forEach(id ->
-                        days.add(ChipMaps.getChipIdToDayMap().get(id)));
+            binding.dayChipGroup.getCheckedChipIds().forEach(id ->
+                    days.add(ChipMaps.getChipIdToDayMap().get(id)));
 
-                binding.timeChipGroup.getCheckedChipIds().forEach(id -> {
-                    selectedTimeRanges.add(ChipMaps.getChipIdToTimeMap().get(id));
-                });
+            binding.timeChipGroup.getCheckedChipIds().forEach(id -> {
+                selectedTimeRanges.add(ChipMaps.getChipIdToTimeMap().get(id));
+            });
 
 
-                ArrayList<Integer> dayOffsets = calculateDayOffsets(days);
+            ArrayList<Integer> dayOffsets = calculateDayOffsets(days);
 
-                ArrayList<Interval> intervals = buildTimestampRanges(dayOffsets, selectedTimeRanges);
-                Timber.d("Ranges are: %s", intervals);
+            ArrayList<Interval> intervals = buildTimestampRanges(dayOffsets, selectedTimeRanges);
+            Timber.d("Ranges are: %s", intervals);
 
-                // TODO: Use builder pattern
-                assistedEventRequest.setToken(mLoggedInStatus.getUser().getToken());
-                assistedEventRequest.setIntervals(intervals);
-                assistedEventRequest.setReserveEvenIfNoMatch(binding.switchConsent.isChecked());
-                assistedEventRequest.setDuration((long) binding.durationWidget.slider.getValue());
+            assistedEventBuilder.setIntervals(intervals);
+            assistedEventBuilder.setReserveEvenIfNoMatch(binding.switchConsent.isChecked());
 
-                assistedEventRequest.setLocationId(locationId);
-                assistedEventRequest.setCreator(mLoggedInStatus.getUser().getUsername());
+            assistedEventBuilder.setCreator(mLoggedInStatus.getUser().getUsername());
+            assistedEventBuilder.setReserveEvenIfNoMatch(binding.switchConsent.isChecked());
+            assistedEventBuilder.setDuration((long) binding.durationWidget.slider.getValue());
 
-                sendAPIRequest(assistedEventRequest);
+            AssistedEvent assistedEvent;
+            try {
+                assistedEvent = assistedEventBuilder.build();
+                sendAPIRequest(assistedEvent, mLoggedInStatus.getUser().getToken());
+            } catch (InstantiationException e) {
+                Timber.e(e.getLocalizedMessage());
             }
         });
 
-        binding.durationWidget.slider.addOnChangeListener(new Slider.OnChangeListener() {
-            @Override
-            public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
-                binding.durationWidget.endText.setText(String.format(Locale.ENGLISH,
-                        Constants.durationValueFormat, value));
-            }
+        binding.durationWidget.slider.addOnChangeListener((slider, value, fromUser) -> {
+            binding.durationWidget.endText.setText(String.format(Locale.ENGLISH,
+                    Constants.durationValueFormat, value));
         });
 
 
