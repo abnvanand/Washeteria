@@ -112,9 +112,9 @@ public class LoginActivity extends AppCompatActivity {
                     if (loggedInStatus.getError() != null) {
                         loadingProgressBar.setVisibility(View.INVISIBLE);
 //                        Timber.d(loggedInStatus.getError(), "LoggedinStatusError");
-                        Timber.d("LoggedinStatusError getMessage: %s", loggedInStatus.getError().getMesssage());
+                        Timber.d("LoggedinStatusError getMessage: %s", loggedInStatus.getError().getMessage());
                         Toast.makeText(this,
-                                loggedInStatus.getError().getMesssage(),
+                                loggedInStatus.getError().getMessage(),
                                 Toast.LENGTH_SHORT)
                                 .show();
                         return;

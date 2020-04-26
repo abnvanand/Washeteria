@@ -1,15 +1,20 @@
 package github.abnvanand.washeteria.models.pojo;
 
+import com.google.gson.annotations.SerializedName;
+
 public class APIError {
+    @SerializedName("errorCode")
     private String errorCode;
     private int httpStatusCode;
-    private String messsage;
+
+    @SerializedName("message")
+    private String message;
 
 
-    public APIError(String errorCode, int httpStatusCode, String messsage) {
+    public APIError(String errorCode, int httpStatusCode, String message) {
         this.errorCode = errorCode;
         this.httpStatusCode = httpStatusCode;
-        this.messsage = messsage;
+        this.message = message;
     }
 
     public int getHttpStatusCode() {
@@ -20,12 +25,12 @@ public class APIError {
         this.httpStatusCode = httpStatusCode;
     }
 
-    public String getMesssage() {
-        return messsage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMesssage(String messsage) {
-        this.messsage = messsage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getErrorCode() {
@@ -41,7 +46,7 @@ public class APIError {
         return "APIError{" +
                 "errorCode='" + errorCode + '\'' +
                 ", httpStatusCode=" + httpStatusCode +
-                ", messsage='" + messsage + '\'' +
+                ", messsage='" + message + '\'' +
                 '}';
     }
 }

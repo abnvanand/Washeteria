@@ -228,8 +228,8 @@ public class AssistantActivity extends AppCompatActivity {
             default:
                 Toast.makeText(this,
                         "Err: " +
-                                (!TextUtils.isEmpty(error.getMesssage()) ?
-                                        error.getMesssage() :
+                                (!TextUtils.isEmpty(error.getMessage()) ?
+                                        error.getMessage() :
                                         error.getHttpStatusCode()),
                         Toast.LENGTH_SHORT).show();
 

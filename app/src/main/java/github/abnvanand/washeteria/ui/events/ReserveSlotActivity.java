@@ -214,8 +214,8 @@ public class ReserveSlotActivity extends AppCompatActivity {
             default:
                 Toast.makeText(ReserveSlotActivity.this,
                         "Err: " +
-                                (!TextUtils.isEmpty(error.getMesssage()) ?
-                                        error.getMesssage() :
+                                (!TextUtils.isEmpty(error.getMessage()) ?
+                                        error.getMessage() :
                                         "Try again later."),
                         Toast.LENGTH_SHORT).show();
 

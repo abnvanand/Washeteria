@@ -185,8 +185,8 @@ public class CancelReservationActivity extends AppCompatActivity {
             default:
                 Toast.makeText(CancelReservationActivity.this,
                         "Err: "
-                                + (!TextUtils.isEmpty(error.getMesssage())
-                                ? error.getMesssage() : error.getHttpStatusCode()),
+                                + (!TextUtils.isEmpty(error.getMessage())
+                                ? error.getMessage() : error.getHttpStatusCode()),
                         Toast.LENGTH_SHORT)
                         .show();
         }
