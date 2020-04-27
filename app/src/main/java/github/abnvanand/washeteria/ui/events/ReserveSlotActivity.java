@@ -33,6 +33,7 @@ import github.abnvanand.washeteria.models.pojo.APIError;
 import github.abnvanand.washeteria.models.pojo.EventCreateBody;
 import github.abnvanand.washeteria.network.RetrofitSingleton;
 import github.abnvanand.washeteria.network.WebService;
+import github.abnvanand.washeteria.notification.NotificationHelper;
 import github.abnvanand.washeteria.shareprefs.SessionManager;
 import github.abnvanand.washeteria.ui.login.LoggedInStatus;
 import github.abnvanand.washeteria.ui.login.LoginActivity;
@@ -177,13 +178,32 @@ public class ReserveSlotActivity extends AppCompatActivity {
                     return;
                 }
 
-                Toast.makeText(ReserveSlotActivity.this,
-                        "Created event: " + body.getId(),
-                        Toast.LENGTH_SHORT)
-                        .show();
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppDatabase.getInstance(ReserveSlotActivity.this)
+                                .eventDao().insertEvent(body);
 
-                setResult(RESULT_OK);
-                finish();
+                        NotificationHelper
+                                .setOneTimeRTCNotification(
+                                        getApplicationContext(),
+                                        body);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(ReserveSlotActivity.this,
+                                        "Created event: " + body.getId(),
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        });
+
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+                });
+
             }
 
             @Override

@@ -3,6 +3,7 @@
     package="github.abnvanand.washeteria">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".MainApplication"
@@ -13,9 +14,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+
+        <receiver android:name=".notification.AlarmReceiver" />
+
+        <activity
+            android:name=".ui.events.EventDetailsActivity"
+            android:label="Reservation Details" />
+
+
         <activity android:name=".ui.login.LoginActivity" />
-        <activity android:name=".ui.events.ViewSlotsActivity"
-            android:label="View Slots"/>
+        <activity
+            android:name=".ui.events.ViewSlotsActivity"
+            android:label="View Slots" />
         <activity
             android:name=".ui.events.EventsForMachineActivity"
             android:label="Manual Reservation" />
