@@ -33,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private View logoutForm;
     private TextView textViewUsername;
-    TextInputEditText tokenEditText, expiresAtEditText;
+    private TextInputEditText tokenEditText, expiresAtEditText;
     private Button logoutButton;
 
     @Override
